@@ -57,18 +57,53 @@ bun run test:all
 # Build for production
 bun run build
 
-# Build production containers
-docker-compose build
+# Git workflow with conventional commits
+git add .
+bun run commit              # Interactive commit wizard
+git push origin main       # Triggers CI/CD pipeline
 
-# Deploy full stack
-docker-compose up -d
+# Quality checks
+bun run lint               # ESLint with Prettier
+bun run typecheck          # TypeScript validation
+bun run test               # Run tests
+bun run test:coverage      # Coverage report
 
-# View aggregated logs
-docker-compose logs -f
+# Build and deployment
+docker-compose build       # Build containers
+docker-compose up -d       # Deploy stack
+docker-compose logs -f     # View logs
 
 # Monitor metrics
 open http://localhost:3000  # Grafana dashboard
 ```
+
+## CI/CD Pipeline
+
+### Automated Releases with semantic-release
+
+The project uses **semantic-release** for automated versioning and publishing:
+
+- **Conventional Commits**: Automatic version bumping based on commit messages
+- **GitHub Actions**: CI/CD pipeline with quality checks
+- **Automatic Publishing**: GitHub releases and NPM package publishing
+- **Changelog Generation**: Automatic CHANGELOG.md updates
+
+### Commit Guidelines
+
+Use conventional commit format to trigger releases:
+
+```bash
+feat: add new feature          # Minor release
+fix: resolve bug              # Patch release
+docs: update documentation    # No version bump
+perf: improve performance     # Patch release
+feat(api)!: breaking change   # Major release
+```
+
+### Required Repository Secrets
+
+- `GITHUB_TOKEN`: Automatically provided by GitHub Actions
+- `NPM_TOKEN`: NPM automation token for package publishing
 
 ## Environment Variables
 - `VAULT_ADDR`: HashiCorp Vault address

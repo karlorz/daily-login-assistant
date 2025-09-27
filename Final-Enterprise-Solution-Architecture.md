@@ -768,6 +768,99 @@ export class PrometheusMonitoringService implements IMonitoringService {
 }
 ```
 
+## CI/CD Configuration
+
+### Automated Release Pipeline with semantic-release
+
+The project uses **semantic-release** for automated versioning and publishing based on commit messages following Conventional Commits specification.
+
+#### GitHub Actions CI/CD Workflow
+
+```yaml
+name: CI/CD
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write      # GitHub releases
+      issues: write        # Issue comments
+      pull-requests: write # PR comments
+      id-token: write      # NPM provenance
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+      - name: Install dependencies
+        run: bun install
+      - name: Run linting
+        run: bun run lint
+      - name: Run type checking
+        run: bun run typecheck
+      - name: Run tests
+        run: bun run test:all
+      - name: Build project
+        run: bun run build
+      - name: Release
+        if: github.ref == 'refs/heads/main'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: bunx semantic-release
+```
+
+#### Required Secrets
+
+Configure the following repository secrets:
+
+- **GITHUB_TOKEN**: Automatically provided by GitHub Actions
+- **NPM_TOKEN**: NPM automation token for package publishing
+
+#### Commit Message Guidelines
+
+Use **Conventional Commits** format to trigger automatic releases:
+
+```bash
+# Feature releases
+git commit -m "feat: add user authentication module"
+
+# Bug fixes
+git commit -m "fix: resolve login timeout issue"
+
+# Documentation updates
+git commit -m "docs: update API documentation"
+
+# Performance improvements
+git commit -m "perf: optimize database queries"
+
+# Breaking changes
+git commit -m "feat(api)!: remove deprecated endpoint"
+```
+
+#### Release Workflow
+
+1. **Push to main branch** → CI runs all checks
+2. **Passing builds** → semantic-release analyzes commits
+3. **Version bump** → Automatic version increment based on commit types
+4. **Changelog generation** → Automatic CHANGELOG.md updates
+5. **Git tag creation** → Version tags created automatically
+6. **GitHub release** → Release notes and assets published
+7. **NPM publish** → Package published to npm registry
+
 ## Docker Configuration
 
 ### Multi-Stage Production Dockerfile
