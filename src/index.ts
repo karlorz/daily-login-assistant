@@ -3,6 +3,7 @@ import { container } from './core/container';
 import { IConfigService, INotificationService, IMonitoringService } from './core/interfaces';
 import { TYPES } from './core/types';
 import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
+import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
 import path from 'path';
 
 async function main() {
@@ -14,6 +15,17 @@ async function main() {
     const notificationService = container.get<INotificationService>(TYPES.NotificationService);
     const monitoringService = container.get<IMonitoringService>(TYPES.MonitoringService);
     const _taskQueue = container.get<InMemoryTaskQueue>(TYPES.TaskQueue);
+
+    // Start webhook listener in development
+    let webhookListener: DevWebhookListener | null = null;
+    if (process.env.NODE_ENV === 'development') {
+      try {
+        webhookListener = container.get<DevWebhookListener>(TYPES.DevWebhookListener);
+        await webhookListener.start();
+      } catch {
+        console.log('💡 Webhook listener not available (optional for development)');
+      }
+    }
 
     // Load configuration
     const configPath = path.join(process.cwd(), 'config', 'websites.yaml');
@@ -74,6 +86,11 @@ async function main() {
       console.log(`Received ${signal}, shutting down gracefully...`);
 
       clearInterval(scheduleInterval);
+
+      // Stop webhook listener if running
+      if (webhookListener?.isRunning()) {
+        await webhookListener.stop();
+      }
 
       // Send shutdown notification
       await notificationService.sendShutdownNotification();

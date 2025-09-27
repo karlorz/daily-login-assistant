@@ -1,5 +1,10 @@
 # Daily Login Assistant Bot - Simplified Edition
 
+## ⚠️ CRITICAL NOTE: Git Worktrees
+**DO NOT REMOVE `worktrees/` DIRECTORY** - This contains git worktree sources:
+- `worktrees/docs/` is actively used for documentation creation in separate sessions
+- All content under `worktrees/` must be preserved as it's linked to git worktrees
+
 ## Project Overview
 Streamlined automated daily login assistant bot for small-scale operations (< 10 websites). Features simple in-memory task management, file-based configuration, and notification alerts via shoutrrr CLI.
 

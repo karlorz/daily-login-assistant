@@ -4,7 +4,7 @@ websites:
     url: "https://example1.com/login"
     enabled: true
     schedule:
-      time: "09:00"
+      time: "23:07"
       timezone: "America/New_York"
     credentials:
       username_env: "EXAMPLE1_USERNAME"
