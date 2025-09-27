@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/karlorz/daily-login-assistant/compare/v1.0.0...v1.1.0) (2025-09-27)
+
+
+### Features
+
+* implement simplified architecture with Bun optimization ([7747b7d](https://github.com/karlorz/daily-login-assistant/commit/7747b7df0a18e1c93227c2dd8afa92876dde6859))
+
 # 1.0.0 (2025-09-27)
 
 
