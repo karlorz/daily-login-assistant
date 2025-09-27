@@ -7,12 +7,16 @@ import { SimpleMonitoringService } from "../infrastructure/monitoring/simple-mon
 import { ShoutrrNotificationService } from "../infrastructure/notifications/shoutrrr-notification.service";
 import { InMemoryTaskQueue } from "../infrastructure/queue/in-memory-task-queue.service";
 import { DevWebhookListener } from "../infrastructure/dev/webhook-listener.service";
+import { PlaywrightBrowserService } from "../infrastructure/browser/playwright-browser.service";
+import { LoginEngine } from "../infrastructure/browser/login-engine.service";
 
 // Import interfaces
 import {
   IConfigService,
   IMonitoringService,
   INotificationService,
+  IBrowserService,
+  ILoginService,
 } from "./interfaces";
 
 const container = new Container();
@@ -26,6 +30,8 @@ container
   .bind<INotificationService>(TYPES.NotificationService)
   .to(ShoutrrNotificationService);
 container.bind<InMemoryTaskQueue>(TYPES.TaskQueue).to(InMemoryTaskQueue);
+container.bind<IBrowserService>(TYPES.BrowserService).to(PlaywrightBrowserService);
+container.bind<ILoginService>(TYPES.LoginService).to(LoginEngine);
 
 // Development Services (only in development)
 if (process.env.NODE_ENV === 'development') {

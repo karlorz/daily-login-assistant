@@ -1,5 +1,5 @@
 import { BrowserContext, Page } from "playwright";
-import { AccountCredentials, WebsiteConfig } from "../entities";
+import { AccountCredentials, WebsiteConfig, BrowserSession } from "../entities";
 
 export interface IBrowserService {
   createSession(
@@ -18,13 +18,4 @@ export interface IBrowserService {
   isAlreadyLoggedIn(page: Page, websiteConfig: WebsiteConfig): Promise<boolean>;
   findElementWithFallback(page: Page, selectors: string[]): Promise<unknown>;
   takeScreenshot(page: Page, name: string): Promise<string>;
-}
-
-export class BrowserSession {
-  constructor(
-    public context: BrowserContext,
-    public page: Page,
-    public accountId: string,
-    public createdAt: Date = new Date(),
-  ) {}
 }

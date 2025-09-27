@@ -1,9 +1,10 @@
 import 'reflect-metadata';
 import { container } from './core/container';
-import { IConfigService, INotificationService, IMonitoringService } from './core/interfaces';
+import { IConfigService, INotificationService, IMonitoringService, ILoginService } from './core/interfaces';
 import { TYPES } from './core/types';
 import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
 import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
+import { LoginTask, TaskPriority } from './core/entities/login-task.entity';
 import path from 'path';
 
 async function main() {
@@ -14,6 +15,7 @@ async function main() {
     const configService = container.get<IConfigService>(TYPES.ConfigService);
     const notificationService = container.get<INotificationService>(TYPES.NotificationService);
     const monitoringService = container.get<IMonitoringService>(TYPES.MonitoringService);
+    const loginService = container.get<ILoginService>(TYPES.LoginService);
     const _taskQueue = container.get<InMemoryTaskQueue>(TYPES.TaskQueue);
 
     // Start webhook listener in development
@@ -50,7 +52,7 @@ async function main() {
     await notificationService.sendStartupNotification();
     console.log('Startup notification sent');
 
-    // Simple scheduling logic - runs every minute
+    // Enhanced scheduling logic with actual login tasks
     const runScheduledTasks = async () => {
       const now = new Date();
       const currentTime = now.toTimeString().substring(0, 5); // HH:MM format
@@ -58,17 +60,34 @@ async function main() {
       console.log(`Checking scheduled tasks at ${currentTime}`);
 
       for (const config of websiteConfigs) {
-        // Simple time-based scheduling (you can enhance this)
+        // Simple time-based scheduling
         if (config.schedule && config.schedule.time === currentTime) {
-          console.log(`Scheduling login task for ${config.name}`);
+          console.log(`Creating login task for ${config.name}`);
 
-          // Create a simple login task (you'll need to implement the LoginTask entity)
-          // For now, just log the action
-          console.log(`Would execute login for ${config.name} (${config.url})`);
+          // Create and process login task
+          const loginTask = new LoginTask(
+            `task_${config.id}_${Date.now()}`,
+            'default_account', // You can make this configurable
+            config.id,
+            TaskPriority.NORMAL,
+            new Date(),
+            config.automation?.retryAttempts || 3
+          );
 
-          monitoringService.recordLoginAttempt(config.id, 'system', 'success');
+          try {
+            const success = await loginService.processLoginTask(loginTask);
 
-          await notificationService.sendLoginSuccess(config.name, 'scheduled');
+            if (success) {
+              monitoringService.recordLoginAttempt(config.id, 'default_account', 'success');
+              console.log(`✅ Login task completed successfully for ${config.name}`);
+            } else {
+              monitoringService.recordLoginAttempt(config.id, 'default_account', 'failed');
+              console.log(`❌ Login task failed for ${config.name}`);
+            }
+          } catch (error) {
+            console.error(`Error processing login task for ${config.name}:`, error);
+            monitoringService.recordLoginAttempt(config.id, 'default_account', 'failed');
+          }
         }
       }
     };
@@ -97,7 +116,8 @@ async function main() {
 
       // Get final stats
       const stats = monitoringService.getStats();
-      console.log('Final statistics:', stats);
+      const loginStats = loginService.getMetrics();
+      console.log('Final statistics:', { ...stats, ...loginStats });
 
       if (stats.totalLogins > 0) {
         await notificationService.sendDailySummary(
