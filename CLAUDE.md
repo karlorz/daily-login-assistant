@@ -4,12 +4,15 @@
 Enterprise-grade automated daily login assistant bot for headless Ubuntu containers/Docker. Features message queue-driven architecture, advanced browser automation with anti-detection, and production-ready monitoring and security.
 
 ## Tech Stack
-- **Runtime**: Node.js 20 LTS + TypeScript 5.x
+- **Package Manager**: Bun's built-in package manager (3x faster than npm)
+- **Runtime**: Bun JavaScript & TypeScript runtime (Node.js compatible)
+- **Bundler**: Built-in bundler for production builds
+- **Test Runner**: Built-in Jest-compatible test runner
 - **Browser Automation**: Playwright with stealth capabilities
 - **Message Queue**: Redis Streams for task management
 - **Monitoring**: Prometheus + Grafana
 - **Security**: HashiCorp Vault / AWS Secrets Manager
-- **Container**: Docker with distroless base images
+- **Container**: Docker with multi-stage builds using Bun images
 - **Architecture**: Dependency injection with clean architecture
 
 ## Key Features
@@ -39,14 +42,20 @@ daily-login-assistant-enterprise/
 
 ## Development Commands
 ```bash
-# Install dependencies
-npm ci
+# Install Bun (first time setup)
+curl -fsSL https://bun.sh/install | bash
 
-# Start development environment
-npm run dev
+# Install dependencies
+bun install
+
+# Start development environment with hot reload
+bun run dev
 
 # Run comprehensive tests
-npm run test:all
+bun run test:all
+
+# Build for production
+bun run build
 
 # Build production containers
 docker-compose build
@@ -88,6 +97,7 @@ open http://localhost:3000  # Grafana dashboard
 - [x] **Deep Technical Analysis Complete**
 - [x] **Enterprise Architecture Designed**
 - [x] **Final Solution Documentation**
+- [x] **Migrated to Bun for improved performance**
 - [ ] Phase 1: Foundation Infrastructure (Weeks 1-2)
 - [ ] Phase 2: Scalability & Resilience (Weeks 3-4)
 - [ ] Phase 3: Observability & Security (Weeks 5-6)
@@ -104,6 +114,25 @@ open http://localhost:3000  # Grafana dashboard
 - [Enterprise Solution Architecture](Final-Enterprise-Solution-Architecture.md) - Complete production-ready design
 - [Original Technical Plan](daily-login-assistant-plan.md) - Initial planning and requirements
 - [Implementation Details](Detailed-Solution.md) - Basic implementation reference
+
+## Bun Quickstart
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Initialize project
+bun init
+
+# Add packages
+bun add playwright
+bun add -d @types/jest typescript
+
+# Run scripts
+bun run dev    # Development
+bun run test   # Tests
+bun run build  # Production build
+bun run start  # Production server
+```
 
 ## Phased Implementation
 1. **Foundation**: Core infrastructure with basic functionality

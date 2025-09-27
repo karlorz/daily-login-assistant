@@ -6,8 +6,7 @@ describe('DailyLoginAssistant', () => {
         expect(index_1.default).toBeDefined();
     });
     test('should have start method', () => {
-        const assistant = new index_1.default();
-        expect(typeof assistant.start).toBe('function');
+        expect(typeof index_1.default.start).toBe('function');
     });
 });
 //# sourceMappingURL=index.test.js.map

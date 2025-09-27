@@ -14,14 +14,47 @@ This document presents the definitive architecture and implementation plan for a
 - **Maintainability**: TypeScript with dependency injection and clean architecture
 
 ### Technology Stack
-- **Runtime**: Node.js 20 LTS + TypeScript 5.x
+- **Package Manager**: Bun's built-in package manager (3x faster than npm)
+- **Runtime**: Bun JavaScript & TypeScript runtime (Node.js compatible)
+- **Bundler**: Built-in bundler for production builds
+- **Test Runner**: Built-in Jest-compatible test runner
 - **Browser Automation**: Playwright with stealth capabilities
 - **Message Queue**: Redis Streams for task management
 - **Monitoring**: Prometheus + Grafana
-- **Logging**: Winston with structured JSON
 - **Security**: HashiCorp Vault / AWS Secrets Manager
-- **Container**: Docker with distroless base images
-- **Orchestration**: Docker Compose / Kubernetes
+- **Container**: Docker with multi-stage builds using Bun images
+- **Architecture**: Dependency injection with clean architecture
+
+## Bun Quickstart Guide
+
+```bash
+# Install Bun
+curl -fsSL https://bun.sh/install | bash
+
+# Create and initialize new project
+mkdir daily-login-assistant
+cd daily-login-assistant
+bun init
+
+# Install dependencies
+bun install
+
+# Add specific packages
+bun add figlet
+bun add -d @types/figlet  # TypeScript declarations
+
+# Run development server with hot reload
+bun run dev
+
+# Run tests
+bun run test
+
+# Build for production
+bun run build
+
+# Start production server
+bun run start
+```
 
 ## System Architecture
 
@@ -742,7 +775,7 @@ export class PrometheusMonitoringService implements IMonitoringService {
 ```dockerfile
 # docker/Dockerfile.worker
 # Build stage
-FROM node:20-alpine AS builder
+FROM oven-sh/bun:latest AS builder
 
 WORKDIR /app
 
@@ -750,17 +783,17 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 
-# Install dependencies
-RUN npm ci --only=production && npm cache clean --force
+# Install dependencies using Bun
+RUN bun install --frozen-lockfile --production
 
 # Copy source code
 COPY src/ ./src/
 
 # Build TypeScript
-RUN npm run build
+RUN bun run build
 
-# Production stage with distroless
-FROM gcr.io/distroless/nodejs20-debian12
+# Production stage
+FROM oven-sh/bun:slim
 
 # Copy built application
 COPY --from=builder /app/dist /app
@@ -771,10 +804,10 @@ USER 1001:1001
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD ["/nodejs", "/app/health-check.js"]
+  CMD ["bun", "run", "health-check"]
 
 # Start application
-CMD ["/nodejs", "/app/main.js"]
+CMD ["bun", "run", "start"]
 ```
 
 ### Complete Docker Compose Stack
