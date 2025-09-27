@@ -28,22 +28,22 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          cache: 'npm'
+          cache: 'bun'
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
       - name: Install dependencies
-        run: npm clean-install
+        run: bun install
       - name: Run linting
-        run: npm run lint
+        run: bun run lint
       - name: Run type checking
-        run: npm run typecheck
+        run: bun run typecheck
       - name: Run tests
-        run: npm run test:all
+        run: bun run test:all
       - name: Build project
-        run: npm run build
-      - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
-        run: npm audit signatures
+        run: bun run build
       - name: Release
         if: github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npx semantic-release
+        run: bunx semantic-release
