@@ -3,7 +3,7 @@ import type { ILoginService } from '../../core/interfaces/login.service.interfac
 import type { IBrowserService } from '../../core/interfaces/browser.service.interface';
 import type { IConfigService } from '../../core/interfaces/config.service.interface';
 import type { INotificationService } from '../../core/interfaces/notification.service.interface';
-import { LoginTask, TaskStatus } from '../../core/entities/login-task.entity';
+import { LoginTask } from '../../core/entities/login-task.entity';
 import { AccountCredentials } from '../../core/entities/account-credentials.entity';
 import { TYPES } from '../../core/types';
 
@@ -87,7 +87,7 @@ export class LoginEngine implements ILoginService {
         await this.performCheckin(session, websiteConfig);
 
         // Take screenshot for success verification
-        const screenshotPath = await this.browserService.takeScreenshot(
+        const _screenshotPath = await this.browserService.takeScreenshot(
           session.page,
           `login_success_${websiteConfig.id}`
         );
@@ -119,7 +119,7 @@ export class LoginEngine implements ILoginService {
       try {
         const session = await this.browserService.createSession(task.accountId,
           await this.configService.getWebsiteConfig(task.websiteId)!);
-        const screenshotPath = await this.browserService.takeScreenshot(
+        const _screenshotPath = await this.browserService.takeScreenshot(
           session.page,
           `login_failed_${task.websiteId}`
         );

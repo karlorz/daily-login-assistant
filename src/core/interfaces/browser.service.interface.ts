@@ -1,4 +1,4 @@
-import { BrowserContext, Page } from "playwright";
+import { Page } from "playwright";
 import { AccountCredentials, WebsiteConfig, BrowserSession } from "../entities";
 
 export interface IBrowserService {

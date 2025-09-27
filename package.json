@@ -4,7 +4,7 @@
   "description": "Enterprise-grade automated daily login assistant bot for headless Ubuntu containers/Docker",
   "main": "dist/index.js",
   "scripts": {
-    "build": "bun build src/index.ts --outdir dist --target node --format esm",
+    "build": "tsc",
     "build:tsc": "tsc",
     "dev": "bun --watch src/index.ts",
     "start": "bun dist/index.js",
