@@ -1,0 +1,71 @@
+# Daily Login Assistant Configuration
+# This file contains website-specific configurations for automated login
+
+global:
+  # Default timeout for all operations in milliseconds
+  defaultTimeout: 30000
+
+  # Maximum concurrent tasks to process simultaneously
+  maxConcurrentTasks: 10
+
+  # Health check interval in milliseconds
+  healthCheckInterval: 30000
+
+  # Logging level: debug, info, warn, error
+  logLevel: info
+
+websites:
+  - id: example-website
+    name: Example Daily Login Website
+    url: https://example.com/login
+
+    selectors:
+      username:
+        - 'input[name="username"]'
+        - 'input[type="email"]'
+        - 'input#username'
+      password:
+        - 'input[name="password"]'
+        - 'input[type="password"]'
+        - 'input#password'
+      loginButton:
+        - 'button[type="submit"]'
+        - 'input[type="submit"]'
+        - 'button:has-text("Login")'
+      checkinButton:
+        - 'button:has-text("Check In")'
+        - 'button:has-text("Daily Check-in")'
+        - 'button.checkin-btn'
+      logoutIndicator:
+        - 'a:has-text("Logout")'
+        - 'button:has-text("Sign Out")'
+        - '.user-menu'
+
+    automation:
+      # Wait for network idle after navigation
+      waitForNetworkIdle: true
+
+      # Delay between keystrokes in milliseconds
+      typingDelay: 100
+
+      # Navigation timeout in milliseconds
+      navigationTimeout: 30000
+
+      # Number of retry attempts for failed operations
+      retryAttempts: 3
+
+      # Delay between retries in milliseconds
+      retryDelay: 5000
+
+    security:
+      # Whether the website requires two-factor authentication
+      requireTwoFactor: false
+
+      # External captcha solving service (optional)
+      captchaService: null
+
+      # Enable user agent rotation for anti-detection
+      userAgentRotation: true
+
+      # Whether proxy is required for this website
+      proxyRequired: false

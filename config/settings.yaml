@@ -1,0 +1,28 @@
+settings:
+  global:
+    defaultTimeout: 30000
+    maxConcurrentTasks: 2
+    logLevel: "info"
+    retryFailedTasksAfter: 3600000  # 1 hour in ms
+
+  notifications:
+    sendOnSuccess: true
+    sendOnFailure: true
+    sendDailySummary: true
+    summaryTime: "20:00"
+    timezone: "America/New_York"
+
+  browser:
+    headless: true
+    userDataDir: "./profiles"
+    args:
+      - "--no-sandbox"
+      - "--disable-dev-shm-usage"
+      - "--disable-gpu"
+      - "--disable-web-security"
+      - "--disable-features=VizDisplayCompositor"
+
+  scheduler:
+    enabled: true
+    checkInterval: 60000  # Check every minute
+    maxMissedSchedules: 3

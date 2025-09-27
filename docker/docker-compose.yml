@@ -1,0 +1,61 @@
+version: '3.9'
+
+services:
+  daily-login-bot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: daily-login-assistant
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: info
+      # Notification URLs (comma-separated)
+      NOTIFICATION_URLS: ${NOTIFICATION_URLS:-}
+      # Website credentials
+      EXAMPLE1_USERNAME: ${EXAMPLE1_USERNAME:-}
+      EXAMPLE1_PASSWORD: ${EXAMPLE1_PASSWORD:-}
+      EXAMPLE2_USERNAME: ${EXAMPLE2_USERNAME:-}
+      EXAMPLE2_PASSWORD: ${EXAMPLE2_PASSWORD:-}
+    volumes:
+      # Configuration
+      - ../config:/app/config:ro
+      # Persistent data
+      - profiles_data:/app/profiles
+      - logs_data:/app/logs
+      # Shared memory for browser
+      - /dev/shm:/dev/shm
+    # Optional: Uncomment to expose logs for monitoring
+    # ports:
+    #   - "8080:8080"
+
+    # Resource limits
+    mem_limit: 1g
+    mem_reservation: 512m
+    cpus: 1.0
+
+    # Security
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - SYS_ADMIN  # Required for Chrome sandboxing
+
+    # Health check
+    healthcheck:
+      test: ["CMD", "ps", "aux", "|", "grep", "-v", "grep", "|", "grep", "-q", "bun"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  profiles_data:
+    driver: local
+  logs_data:
+    driver: local
+
+networks:
+  default:
+    driver: bridge
