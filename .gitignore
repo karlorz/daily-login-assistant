@@ -48,7 +48,10 @@ web_modules/
 *.tsbuildinfo
 *.d.ts
 *.d.ts.map
-*.js
+# Generated JavaScript files (but not config files)
+!eslint.config.js
+!vitest.config.js
+!playwright.config.js
 *.js.map
 
 # Optional npm cache directory
