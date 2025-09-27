@@ -1,6 +1,9 @@
-name: Release
+name: CI/CD
 on:
   push:
+    branches:
+      - main
+  pull_request:
     branches:
       - main
 
@@ -39,6 +42,7 @@ jobs:
       - name: Verify the integrity of provenance attestations and registry signatures for installed dependencies
         run: npm audit signatures
       - name: Release
+        if: github.ref == 'refs/heads/main'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
