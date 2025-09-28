@@ -40,7 +40,7 @@ describe('Browser Automation Integration Tests', () => {
             [],
             ['.post-title', 'h1']
           ),
-          new AutomationConfig(true, 80, 20000, 3, 3000),
+          new AutomationConfig(false, 80, 30000, 3, 3000),
           new SecurityConfig(false, undefined, true, false, true, true, true),
           undefined,
           true,
@@ -235,7 +235,7 @@ describe('Browser Automation Integration Tests', () => {
           [],
           ['.post-title']
         ),
-        new AutomationConfig(true, 80, 20000, 3, 3000),
+        new AutomationConfig(false, 80, 30000, 3, 3000),
         new SecurityConfig(false, undefined, true, false, true, true, true),
         undefined,
         true
