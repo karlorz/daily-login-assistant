@@ -222,11 +222,26 @@ export class PlaywrightBrowserService implements IBrowserService {
     return filepath;
   }
 
+  private shouldRunHeadless(): boolean {
+    // Check explicit HEADLESS environment variable first
+    if (process.env.HEADLESS !== undefined) {
+      return process.env.HEADLESS.toLowerCase() === 'true';
+    }
+
+    // Default to headless in test and production environments
+    const env = process.env.NODE_ENV;
+    return env === 'test' || env === 'production';
+  }
+
   private async initializeBrowser(): Promise<void> {
     console.log('Initializing browser...');
 
+    // Determine headless mode based on environment
+    const isHeadless = this.shouldRunHeadless();
+    console.log(`Browser headless mode: ${isHeadless} (NODE_ENV: ${process.env.NODE_ENV}, HEADLESS: ${process.env.HEADLESS})`);
+
     this.browser = await chromium.launch({
-      headless: process.env.NODE_ENV === 'production',
+      headless: isHeadless,
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
