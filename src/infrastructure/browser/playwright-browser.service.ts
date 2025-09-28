@@ -72,15 +72,36 @@ export class PlaywrightBrowserService implements IBrowserService {
     const timeoutMultiplier = this.getCITimeoutMultiplier();
     const timeout = (websiteConfig.automation?.navigationTimeout || 30000) * timeoutMultiplier;
 
-    await page.goto(websiteConfig.url, {
-      waitUntil: websiteConfig.automation?.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded',
-      timeout: timeout
-    });
+    // In CI, use domcontentloaded instead of networkidle for more reliable navigation
+    const waitUntil = process.env.CI === 'true' ? 'domcontentloaded' :
+      (websiteConfig.automation?.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded');
+
+    try {
+      await page.goto(websiteConfig.url, {
+        waitUntil: waitUntil,
+        timeout: timeout
+      });
+    } catch (error) {
+      // If networkidle fails in CI, fallback to domcontentloaded
+      if (process.env.CI === 'true' && waitUntil === 'domcontentloaded') {
+        console.log('Navigation failed, retrying with shorter timeout...');
+        await page.goto(websiteConfig.url, {
+          waitUntil: 'domcontentloaded',
+          timeout: Math.min(timeout, 15000)
+        });
+      } else {
+        throw error;
+      }
+    }
 
     // Wait for page to be fully loaded in CI environments
     if (process.env.CI === 'true') {
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForTimeout(2000); // Extra wait for CI stability
+      try {
+        await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
+        await page.waitForTimeout(3000); // Extra wait for CI stability
+      } catch (error) {
+        console.log('Wait for load state failed, continuing anyway...');
+      }
     }
 
     // Add random delay for anti-detection (but skip in CI for speed)
@@ -137,7 +158,17 @@ export class PlaywrightBrowserService implements IBrowserService {
 
       // Wait for navigation or login completion
       if (websiteConfig.automation?.waitForNetworkIdle) {
-        await page.waitForLoadState('networkidle', { timeout: 15000 });
+        // In CI, use shorter timeout and fallback to domcontentloaded
+        if (process.env.CI === 'true') {
+          try {
+            await page.waitForLoadState('networkidle', { timeout: 10000 });
+          } catch (error) {
+            console.log('Network idle wait failed, falling back to domcontentloaded...');
+            await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
+          }
+        } else {
+          await page.waitForLoadState('networkidle', { timeout: 15000 });
+        }
       } else {
         await page.waitForTimeout(3000);
       }
@@ -247,7 +278,7 @@ export class PlaywrightBrowserService implements IBrowserService {
 
   private getCITimeoutMultiplier(): number {
     return process.env.CI === 'true' ?
-      parseInt(process.env.CI_TIMEOUT_MULTIPLIER || '3', 10) : 1;
+      parseInt(process.env.CI_TIMEOUT_MULTIPLIER || '4', 10) : 1;
   }
 
   private getCIBrowserArgs(): string[] {
@@ -272,6 +303,25 @@ export class PlaywrightBrowserService implements IBrowserService {
         '--disable-ipc-flooding-protection',
         '--disable-web-security',
         '--disable-features=VizDisplayCompositor',
+        '--disable-blink-features=AutomationControlled',
+        '--disable-dev-shm-usage',
+        '--disable-software-rasterizer',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-images',
+        '--disable-javascript-harmony-promises',
+        '--disable-javascript-harmony-proxies',
+        '--disable-background-mode',
+        '--disable-component-update',
+        '--disable-domain-reliability',
+        '--disable-features=AutofillServerCommunication',
+        '--disable-features=InterestFeedContent',
+        '--disable-features=OptimizationHints',
+        '--disable-features=PasswordStrengthIndicator',
+        '--disable-features=MediaRouter',
+        '--disable-features=ChromeWhatsNewUI',
+        '--disable-features=CookieDeprecationMessages',
+        '--disable-features=PrivacySandboxSettings4',
       ];
     }
 

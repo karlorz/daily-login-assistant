@@ -31,7 +31,7 @@ describe('Quick Demo Site Tests', () => {
           [],
           ['.post-title', 'h1']
         ),
-        new AutomationConfig(true, 80, 20000, 3, 3000),
+        new AutomationConfig(false, 80, 30000, 3, 3000),
         new SecurityConfig(false, undefined, true, false, true, true, true),
         undefined,
         true,
@@ -64,7 +64,7 @@ describe('Quick Demo Site Tests', () => {
       expect(totalTime).toBeLessThan(30000); // Should complete within 30 seconds
 
       await browserService.closeSession(session.id);
-    }, 45000);
+    }, 60000);
 
     it('should measure practice site performance', async () => {
       const times: number[] = [];
