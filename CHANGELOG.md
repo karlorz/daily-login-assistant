@@ -1,3 +1,11 @@
+## [1.2.1](https://github.com/karlorz/daily-login-assistant/compare/v1.2.0...v1.2.1) (2025-09-28)
+
+
+### Bug Fixes
+
+* resolve Playwright timeout issues in GitHub Actions CI environment ([42a251b](https://github.com/karlorz/daily-login-assistant/commit/42a251bcb01cd11c5021534db1fe3e53ed645bcc))
+* resolve Playwright timeout issues in GitHub Actions CI environment ([22c8d3c](https://github.com/karlorz/daily-login-assistant/commit/22c8d3cf4f1ae076c6036dfa13aa9d4046111805))
+
 # [1.2.0](https://github.com/karlorz/daily-login-assistant/compare/v1.1.0...v1.2.0) (2025-09-28)
 
 
