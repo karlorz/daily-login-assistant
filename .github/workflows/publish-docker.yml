@@ -64,10 +64,11 @@ jobs:
           images: |
             ${{ vars.DOCKERHUB_USERNAME }}/daily-login-assistant
             ghcr.io/${{ github.repository }}
-          tags: |
-            type=ref,event=branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value={{branch}},enable={{is_default_branch}}
+          # tags: |
+          #   type=raw,value=latest,enable={{is_default_branch}}
+          #   type=raw,value={{branch}},enable={{is_default_branch}}
+          #   type=raw,value={{date 'YYYYMMDD'}}
+          #   type=schedule,pattern=daily-{{date 'YYYYMMDD'}}
 
       - name: Build and push Docker images
         id: push
