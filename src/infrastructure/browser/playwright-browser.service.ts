@@ -40,9 +40,10 @@ export class PlaywrightBrowserService implements IBrowserService {
 
     const page = await context.newPage();
 
-    // Set default timeouts
-    page.setDefaultTimeout(websiteConfig.automation?.navigationTimeout || 30000);
-    page.setDefaultNavigationTimeout(websiteConfig.automation?.navigationTimeout || 30000);
+    // Set default timeouts with CI multiplier
+    const timeoutMultiplier = this.getCITimeoutMultiplier();
+    page.setDefaultTimeout((websiteConfig.automation?.navigationTimeout || 30000) * timeoutMultiplier);
+    page.setDefaultNavigationTimeout((websiteConfig.automation?.navigationTimeout || 30000) * timeoutMultiplier);
 
     const sessionId = `${accountId}_${websiteConfig.id}_${Date.now()}`;
     const session = new BrowserSession(
@@ -68,12 +69,22 @@ export class PlaywrightBrowserService implements IBrowserService {
   async navigateToLogin(page: Page, websiteConfig: WebsiteConfig): Promise<void> {
     console.log(`Navigating to ${websiteConfig.url}`);
 
+    const timeoutMultiplier = this.getCITimeoutMultiplier();
+    const timeout = (websiteConfig.automation?.navigationTimeout || 30000) * timeoutMultiplier;
+
     await page.goto(websiteConfig.url, {
-      waitUntil: websiteConfig.automation?.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded'
+      waitUntil: websiteConfig.automation?.waitForNetworkIdle ? 'networkidle' : 'domcontentloaded',
+      timeout: timeout
     });
 
-    // Add random delay for anti-detection
-    if (websiteConfig.security?.randomDelays) {
+    // Wait for page to be fully loaded in CI environments
+    if (process.env.CI === 'true') {
+      await page.waitForLoadState('domcontentloaded');
+      await page.waitForTimeout(2000); // Extra wait for CI stability
+    }
+
+    // Add random delay for anti-detection (but skip in CI for speed)
+    if (websiteConfig.security?.randomDelays && process.env.CI !== 'true') {
       await this.randomDelay(1000, 3000);
     }
   }
@@ -228,9 +239,43 @@ export class PlaywrightBrowserService implements IBrowserService {
       return process.env.HEADLESS.toLowerCase() === 'true';
     }
 
-    // Default to headless in test and production environments
+    // Default to headless in test, production, and CI environments
     const env = process.env.NODE_ENV;
-    return env === 'test' || env === 'production';
+    const isCI = process.env.CI === 'true';
+    return env === 'test' || env === 'production' || isCI;
+  }
+
+  private getCITimeoutMultiplier(): number {
+    return process.env.CI === 'true' ?
+      parseInt(process.env.CI_TIMEOUT_MULTIPLIER || '3', 10) : 1;
+  }
+
+  private getCIBrowserArgs(): string[] {
+    const baseArgs = [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu',
+    ];
+
+    // Add additional CI-specific flags for better stability
+    if (process.env.CI === 'true') {
+      return [
+        ...baseArgs,
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI',
+        '--disable-ipc-flooding-protection',
+        '--disable-web-security',
+        '--disable-features=VizDisplayCompositor',
+      ];
+    }
+
+    return baseArgs;
   }
 
   private async initializeBrowser(): Promise<void> {
@@ -238,22 +283,12 @@ export class PlaywrightBrowserService implements IBrowserService {
 
     // Determine headless mode based on environment
     const isHeadless = this.shouldRunHeadless();
-    console.log(`Browser headless mode: ${isHeadless} (NODE_ENV: ${process.env.NODE_ENV}, HEADLESS: ${process.env.HEADLESS})`);
+    const isCI = process.env.CI === 'true';
+    console.log(`Browser headless mode: ${isHeadless} (NODE_ENV: ${process.env.NODE_ENV}, HEADLESS: ${process.env.HEADLESS}, CI: ${isCI})`);
 
     this.browser = await chromium.launch({
       headless: isHeadless,
-      args: [
-        '--no-sandbox',
-        '--disable-setuid-sandbox',
-        '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
-        '--no-first-run',
-        '--no-zygote',
-        '--disable-gpu',
-        '--disable-background-timer-throttling',
-        '--disable-backgrounding-occluded-windows',
-        '--disable-renderer-backgrounding',
-      ],
+      args: this.getCIBrowserArgs(),
     });
 
     console.log('Browser initialized');

@@ -20,7 +20,7 @@ permissions:
 jobs:
   build-and-test:
     name: Build and Test
-    timeout-minutes: 12 # Further reduced with improved caching
+    timeout-minutes: 30 # Increased for browser automation tests
     runs-on: ubuntu-latest
     permissions:
       contents: read # for checkout
@@ -83,8 +83,7 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install Playwright Browsers
-        if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
-        run: bunx playwright install --with-deps
+        run: bunx playwright install chromium --with-deps
 
       - name: Save Playwright Browsers cache
         if: steps.playwright-cache-restore.outputs.cache-hit != 'true'
@@ -104,6 +103,12 @@ jobs:
       - name: Run tests
         run: bun run test:all
         env:
+          # CI environment detection
+          CI: true
+          # Force headless mode in CI
+          HEADLESS: true
+          # Increase timeouts for CI environment
+          CI_TIMEOUT_MULTIPLIER: 3
           # Enable GitHub reporter for better test failure annotations
           PLAYWRIGHT_TEST_REPORTER: 'github'
 

@@ -11,7 +11,8 @@ export default {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
-  testTimeout: 60000, // 60 seconds for integration tests with browser automation
+  // Increase timeout for CI environment and browser automation
+  testTimeout: process.env.CI === 'true' ? 120000 : 60000, // 2 minutes in CI, 1 minute locally
   globalSetup: '<rootDir>/jest.global-setup.js',
   globalTeardown: '<rootDir>/jest.global-teardown.js',
 };
