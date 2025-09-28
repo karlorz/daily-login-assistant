@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     container:
       # image: mcr.microsoft.com/playwright:v1.55.0-noble
-      image: karl8080/daily-login-assistant:ci-1
+      image: karl8080/daily-login-assistant:latest
       options: --user 1001
     steps:
       - uses: actions/checkout@v4
