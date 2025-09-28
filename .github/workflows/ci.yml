@@ -60,7 +60,6 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        if: steps.bun-cache-restore.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Save Bun dependencies cache
@@ -165,26 +164,10 @@ jobs:
 
       # The release job should be self-contained. It installs its own dependencies
       # to ensure the release environment is clean and reproducible.
-      - name: Restore Bun dependencies cache
-        uses: actions/cache/restore@v4
-        id: release-bun-cache-restore
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
-          restore-keys: |
-            ${{ runner.os }}-bun-
-            ${{ runner.os }}-
-
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      - name: Save Bun dependencies cache
-        if: steps.release-bun-cache-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.bun/install/cache
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
-
+  
       # The build should also happen within the release job to ensure the artifact
       # being published is built in the same self-contained environment.
       - name: Build project
