@@ -21,6 +21,6 @@ docker run -d \
   -e EXAMPLE_PASSWORD="$EXAMPLE_PASSWORD" \
   -e NODE_ENV="$NODE_ENV" \
   -e LOG_LEVEL="$LOG_LEVEL" \
-  daily-login-assistant-daily-login-assistant:latest
+  your-dockerhub-username/daily-login-assistant:ci-1
 
 echo "Container started. Use 'docker logs daily-login-bot' to view logs."
