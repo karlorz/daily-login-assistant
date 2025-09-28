@@ -11,11 +11,11 @@ name: Publish Docker image
 
 on:
   release:
-    types: [published, created, released]
-  push:
-    tags:
-      - 'v*'
+    types: [published]
   workflow_dispatch:
+  schedule:
+    # HKT 02:00 = UTC 18:00 (previous day)
+    - cron: '0 18 * * *'
 
 permissions:
   contents: write
@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Check out the repo
         uses: actions/checkout@v5
+        with:
+          ref: main
 
       - name: Log in to Docker Hub
         uses: docker/login-action@184bdaa0721073962dff0199f1fb9940f07167d1

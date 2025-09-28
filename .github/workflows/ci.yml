@@ -197,7 +197,7 @@ jobs:
 
       - name: Release
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT }}
           # Use NODE_AUTH_TOKEN for npm, which is configured by setup-node
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: bunx semantic-release
