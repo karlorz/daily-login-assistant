@@ -1,3 +1,10 @@
+## [1.2.8](https://github.com/karlorz/daily-login-assistant/compare/v1.2.7...v1.2.8) (2025-09-28)
+
+
+### Bug Fixes
+
+* ci ([406f75e](https://github.com/karlorz/daily-login-assistant/commit/406f75ebdf216f78b45df0a2413416d0c267eec4))
+
 ## [1.2.7](https://github.com/karlorz/daily-login-assistant/compare/v1.2.6...v1.2.7) (2025-09-28)
 
 
