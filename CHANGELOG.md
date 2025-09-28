@@ -1,3 +1,10 @@
+## [1.2.5](https://github.com/karlorz/daily-login-assistant/compare/v1.2.4...v1.2.5) (2025-09-28)
+
+
+### Bug Fixes
+
+* add multiple release event types to Docker workflow ([c05af46](https://github.com/karlorz/daily-login-assistant/commit/c05af46c592c231fdae928c258d7a37069edad01))
+
 ## [1.2.4](https://github.com/karlorz/daily-login-assistant/compare/v1.2.3...v1.2.4) (2025-09-28)
 
 
