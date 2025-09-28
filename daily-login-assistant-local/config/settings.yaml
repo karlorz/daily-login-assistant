@@ -1,0 +1,13 @@
+settings:
+  global:
+    defaultTimeout: 30000
+    maxConcurrentTasks: 2
+    logLevel: "info"
+  notifications:
+    sendOnSuccess: true
+    sendOnFailure: true
+    sendDailySummary: true
+    summaryTime: "20:00"
+  browser:
+    headless: true
+    userDataDir: "./profiles"
