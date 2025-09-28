@@ -36,7 +36,7 @@ jobs:
           set-safe-directory: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           # Use the Node.js version specified in package.json
           node-version-file: 'package.json'
@@ -151,7 +151,7 @@ jobs:
           set-safe-directory: true
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version-file: 'package.json'
           # Set up .npmrc for publishing to npm
@@ -176,7 +176,6 @@ jobs:
             ${{ runner.os }}-
 
       - name: Install dependencies
-        if: steps.release-bun-cache-restore.outputs.cache-hit != 'true'
         run: bun install --frozen-lockfile
 
       - name: Save Bun dependencies cache
