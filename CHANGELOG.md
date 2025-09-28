@@ -1,3 +1,11 @@
+## [1.2.2](https://github.com/karlorz/daily-login-assistant/compare/v1.2.1...v1.2.2) (2025-09-28)
+
+
+### Bug Fixes
+
+* docker ([f999649](https://github.com/karlorz/daily-login-assistant/commit/f999649fd80e0c365e99d6705dfed7b0ae7813d1))
+* Squashed commits from ci-1 ([1aa034a](https://github.com/karlorz/daily-login-assistant/commit/1aa034aa5e9deda80411be2822bec38f4aa2b347))
+
 ## [1.2.1](https://github.com/karlorz/daily-login-assistant/compare/v1.2.0...v1.2.1) (2025-09-28)
 
 
