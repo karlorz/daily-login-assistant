@@ -1,0 +1,20 @@
+websites:
+  - id: example-site
+    name: "Example Site"
+    url: "https://example.com/login"
+    enabled: true
+    schedule:
+      time: "09:00"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "EXAMPLE_USERNAME"
+      password_env: "EXAMPLE_PASSWORD"
+    selectors:
+      username: ["#username", "[name='email']"]
+      password: ["#password", "[name='password']"]
+      loginButton: ["#login", ".login-btn"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
