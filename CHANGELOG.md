@@ -1,3 +1,10 @@
+## [1.2.4](https://github.com/karlorz/daily-login-assistant/compare/v1.2.3...v1.2.4) (2025-09-28)
+
+
+### Bug Fixes
+
+* add tag trigger to Docker publish workflow ([a516d52](https://github.com/karlorz/daily-login-assistant/commit/a516d528f6534f7fbfdc320b00d758692fdfb143))
+
 ## [1.2.3](https://github.com/karlorz/daily-login-assistant/compare/v1.2.2...v1.2.3) (2025-09-28)
 
 
