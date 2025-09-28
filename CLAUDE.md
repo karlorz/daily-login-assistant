@@ -73,6 +73,10 @@ bun run typecheck          # TypeScript validation
 bun run test               # Run tests
 bun run test:coverage      # Coverage report
 
+# Docker linting
+docker run --rm -i hadolint/hadolint < Dockerfile          # Dockerfile best practices
+docker run -t --rm -v ${PWD}:/app zavoloklom/dclint .      # Docker Compose linting
+
 # Build and deployment
 docker build -t daily-login-assistant .
 docker run -d daily-login-assistant
