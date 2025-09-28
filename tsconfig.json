@@ -30,7 +30,7 @@
     "verbatimModuleSyntax": false,
     "noUncheckedSideEffectImports": true,
     "moduleDetection": "force",
-    "types": ["node", "jest"]
+    "types": ["node", "jest", "bun"]
   },
   "include": [
     "src/**/*"

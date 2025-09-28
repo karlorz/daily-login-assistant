@@ -4,4 +4,7 @@ export const TYPES = {
   ConfigService: Symbol.for("ConfigService"),
   MonitoringService: Symbol.for("MonitoringService"),
   NotificationService: Symbol.for("NotificationService"),
+
+  // Development Services
+  DevWebhookListener: Symbol.for("DevWebhookListener"),
 } as const;
