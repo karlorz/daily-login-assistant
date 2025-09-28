@@ -1,6 +1,7 @@
 {
   "name": "daily-login-assistant",
   "version": "1.2.0",
+  "type": "module",
   "description": "Enterprise-grade automated daily login assistant bot for headless Ubuntu containers/Docker",
   "main": "dist/index.js",
   "scripts": {
@@ -20,6 +21,11 @@
     "lint:fix": "bunx oxlint --fix",
     "typecheck": "tsc --noEmit",
     "ci": "bun run lint && bun run typecheck && bun run test:all && bun run build",
+    "guided-login": "bun run build && node scripts/test-user-guided-login.js",
+    "cleanup-profiles": "node scripts/cleanup-profiles.js",
+    "test-session": "node scripts/test-saved-session.js",
+    "profiles": "node scripts/profile-manager.js",
+    "local-ci": "bash scripts/local-ci.sh",
     "commit": "git-cz",
     "semantic-release": "semantic-release"
   },

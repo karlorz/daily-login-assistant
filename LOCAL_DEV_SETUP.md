@@ -69,6 +69,25 @@ bun run test
 set -a && source .env.development && set +a && bun run dev
 ```
 
+### 6. Setup Multi-Profile System (NEW!)
+
+```bash
+# Example: Setup AnyRouter profile
+bun run profiles setup anyrouter.top user1 https://anyrouter.top/login
+
+# What happens:
+# 1. Browser opens to anyrouter.top/login
+# 2. You manually login (GitHub OAuth, email, etc.)
+# 3. Press ENTER when login complete
+# 4. Session saved to profiles/user-guided/anyrouter-user1/
+
+# Daily automation for all profiles
+bun run profiles checkin-all
+
+# Check profile status
+bun run profiles list
+```
+
 ## Development Features
 
 ### 🔥 Hot Reload
@@ -255,48 +274,72 @@ bun run test         # Run all tests (headless by default)
 bun run test:headless # Force headless mode
 bun run test:headed  # Force headed mode (debugging)
 bun run test:watch   # Watch mode for development
-node scripts/test-login.js   # Manual interactive test
 
 # Testing - Traditional
 bun run test:jest    # Jest tests only
 bun run test:coverage # Coverage report
 bun run test:all     # Full test suite
 
+# Multi-Profile System (NEW!)
+bun run profiles setup <site> <user> <url>  # Setup new profile
+bun run profiles list                       # List all profiles
+bun run profiles checkin-all               # Daily check-ins for all
+bun run profiles test <site> <user> <url>  # Test specific profile
+bun run profiles cleanup <site> <user>     # Remove profile
+
 # Quality Assurance
 bun run lint         # Linting with oxlint
 bun run typecheck    # TypeScript validation
-bun run ci           # Full CI pipeline
+bun run local-ci     # Quick CI validation (recommended)
+bun run ci           # Full CI pipeline (slower)
 ```
 
 ## Architecture Overview
 
 ### Simplified Design
+- **Multi-Profile System**: Unified site + user management (`{site}-{user}` profiles)
+- **User-Guided Login**: Manual login once, automated forever (OAuth, 2FA, any auth)
+- **Session Persistence**: Chrome profiles with weeks/months session lifetime
 - **No Redis**: In-memory task queue for <10 websites
-- **No Prometheus/Grafana**: Simple monitoring service
 - **Shoutrrr CLI**: Direct notification system
-- **YAML Config**: File-based configuration
-- **Dependency Injection**: Clean architecture with InversifyJS
-- **Integrated Webhook**: Built-in dev server notification verification
 - **Playwright Automation**: Stealth browser automation with anti-detection
 
 ### Key Services
-- `ConfigService`: YAML configuration management
+- `ProfileManager`: Multi-profile site + user management
+- `UserGuidedLoginService`: Manual login with session persistence
 - `NotificationService`: Shoutrrr CLI integration
-- `MonitoringService`: Simple statistics tracking
-- `TaskQueue`: In-memory task management
-- `DevWebhookListener`: Development notification verification
 - `PlaywrightBrowserService`: Browser automation with stealth capabilities
-- `LoginEngine`: Complete login workflow orchestration
+- `DevWebhookListener`: Development notification verification
 
 ### Browser Automation Features
+- ✅ **Multi-Profile Support**: Unlimited site + user combinations
+- ✅ **User-Guided Login**: Manual login once, automated daily visits
+- ✅ **OAuth Compatible**: GitHub, Discord, Google, any authentication method
+- ✅ **Session Persistence**: Chrome profiles maintain login state for weeks/months
 - ✅ **Stealth Mode**: Anti-detection capabilities
-- ✅ **Human-like Typing**: Random delays and realistic interactions
-- ✅ **Smart Selectors**: Fallback selector chains for robustness
-- ✅ **Session Management**: Proper browser session lifecycle
+- ✅ **Batch Operations**: Daily check-ins for all profiles automatically
 - ✅ **Error Handling**: Comprehensive retry logic and error reporting
-- ✅ **Performance Monitoring**: Built-in timing and metrics collection
+- ✅ **Screenshot Verification**: Audit trail for all daily visits
 
 ## Troubleshooting
+
+### Multi-Profile System Issues
+```bash
+# List all profiles and their status
+bun run profiles list
+
+# Clean up expired/invalid profiles
+bun run profiles cleanup anyrouter.top user1
+
+# Setup fresh profile after cookie expiration
+bun run profiles setup anyrouter.top user1 https://anyrouter.top/login
+
+# Test specific profile session
+bun run profiles test anyrouter.top user1 https://anyrouter.top/login
+
+# Check profile storage
+ls -la profiles/user-guided/
+```
 
 ### Playwright Browser Issues
 ```bash
@@ -379,10 +422,12 @@ bun run build     # Production build
 ## Next Steps
 
 After local development is working:
-1. Test with real notification services (Discord, Slack, etc.)
-2. Configure actual website credentials
-3. Deploy with Docker container
-4. Set up production monitoring
+1. **Explore Multi-Profile System**: See [PROFILE_SYSTEM.md](PROFILE_SYSTEM.md) for comprehensive guide
+2. Setup multiple users: `bun run profiles setup site user url`
+3. Test with real notification services (Discord, Slack, etc.)
+4. Configure actual website credentials
+5. Deploy with Docker container
+6. Set up production monitoring with daily automation
 
 ## Production Deployment
 

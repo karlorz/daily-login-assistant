@@ -99,7 +99,7 @@ export class PlaywrightBrowserService implements IBrowserService {
       try {
         await page.waitForLoadState('domcontentloaded', { timeout: 10000 });
         await page.waitForTimeout(3000); // Extra wait for CI stability
-      } catch (error) {
+      } catch {
         console.log('Wait for load state failed, continuing anyway...');
       }
     }
@@ -162,7 +162,7 @@ export class PlaywrightBrowserService implements IBrowserService {
         if (process.env.CI === 'true') {
           try {
             await page.waitForLoadState('networkidle', { timeout: 10000 });
-          } catch (error) {
+          } catch {
             console.log('Network idle wait failed, falling back to domcontentloaded...');
             await page.waitForLoadState('domcontentloaded', { timeout: 5000 });
           }

@@ -22,13 +22,14 @@ Streamlined automated daily login assistant bot for small-scale operations (< 10
 - **Architecture**: Clean architecture with minimal dependency injection
 
 ## Key Features
-- ✅ **Simplified Architecture**: In-memory task queue for < 10 websites
-- ✅ **File-Based Config**: YAML configuration with hot-reloading
+- ✅ **Multi-Profile System**: Unified site + user management (`bun run profiles`)
+- ✅ **User-Guided Login**: Manual login once, automated forever
+- ✅ **OAuth Support**: GitHub, Discord, any authentication method
+- ✅ **Session Persistence**: Chrome profiles with weeks/months session lifetime
+- ✅ **Batch Operations**: Daily check-ins for unlimited profiles
 - ✅ **Smart Notifications**: Real-time alerts via shoutrrr (Discord, Slack, email, etc.)
 - ✅ **Browser Automation**: Stealth Playwright with anti-detection
-- ✅ **Profile Management**: Local file-based Chrome profile storage
-- ✅ **Clean Logging**: Structured file-based logging
-- ✅ **Environment Variables**: Simple credential management
+- ✅ **Clean Logging**: Screenshots and structured logging
 
 ## Simplified Architecture
 ```
@@ -70,8 +71,14 @@ git push origin main       # Triggers CI/CD pipeline
 # Quality checks
 bun run lint               # oxlint (replaced ESLint)
 bun run typecheck          # TypeScript validation
+bun run local-ci           # Quick CI validation
 bun run test               # Run tests
 bun run test:coverage      # Coverage report
+
+# Multi-Profile System
+bun run profiles setup site user url  # Setup new profile
+bun run profiles list                  # List all profiles
+bun run profiles checkin-all          # Daily check-ins for all
 
 # Build and deployment
 docker build -t daily-login-assistant .
@@ -232,6 +239,7 @@ docker run -d \
 6. **Simplified Architecture**: Clean but minimal dependency injection
 
 ## Documentation
+- [**Multi-Profile System**](PROFILE_SYSTEM.md) - **NEW**: Unified site + user management
 - [Simplified Solution Architecture](Final-Enterprise-Solution-Architecture.md) - Compact design for small-scale operations
 - [Original Technical Plan](daily-login-assistant-plan.md) - Initial planning and requirements
 - [Implementation Details](Detailed-Solution.md) - Basic implementation reference

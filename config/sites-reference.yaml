@@ -1,0 +1,30 @@
+# Multi-Profile Configuration
+# Note: The new profile system handles configuration dynamically
+# This file is optional and for reference only
+
+# Environment Variables (add to .env.development):
+# ANYROUTER_URL=https://anyrouter.top/login
+
+# Usage:
+# bun run profiles setup anyrouter.top user1 https://anyrouter.top/login
+# bun run profiles checkin-all
+
+sites:
+  anyrouter:
+    name: "AnyRouter API Service"
+    loginUrl: "https://anyrouter.top/login"
+    mainUrl: "https://anyrouter.top/console"
+    authMethods: ["GitHub OAuth", "LinuxDO OAuth", "Email/Username"]
+
+  discord:
+    name: "Discord"
+    loginUrl: "https://discord.com/login"
+    authMethods: ["Email/Password", "Phone", "QR Code"]
+
+  github:
+    name: "GitHub"
+    loginUrl: "https://github.com/login"
+    authMethods: ["Username/Password", "2FA", "SSH"]
+
+# Profile examples:
+# anyrouter-user1, anyrouter-user2, discord-main, github-work
