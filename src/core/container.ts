@@ -30,6 +30,8 @@ container
   .bind<INotificationService>(TYPES.NotificationService)
   .to(ShoutrrNotificationService);
 container.bind<InMemoryTaskQueue>(TYPES.TaskQueue).to(InMemoryTaskQueue);
+
+// Browser Automation Services
 container.bind<IBrowserService>(TYPES.BrowserService).to(PlaywrightBrowserService);
 container.bind<ILoginService>(TYPES.LoginService).to(LoginEngine);
 

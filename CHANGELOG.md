@@ -1,3 +1,17 @@
+# [1.2.0](https://github.com/karlorz/daily-login-assistant/compare/v1.1.0...v1.2.0) (2025-09-28)
+
+
+### Bug Fixes
+
+* **ci:** ensure dependencies always install for type checking ([bc3dfba](https://github.com/karlorz/daily-login-assistant/commit/bc3dfba78a634be2025f47416d91c1123956f0c4))
+* **ci:** ensure dependencies install in release job and update actions ([130e6ea](https://github.com/karlorz/daily-login-assistant/commit/130e6ea0fe19a5dc9fc3803d0a79988e1faa5507))
+* **ci:** remove unsupported bun cache from setup-node ([8ee5c6a](https://github.com/karlorz/daily-login-assistant/commit/8ee5c6a5e416ea0d5b2af686eea06f7764a4bdbb))
+
+
+### Features
+
+* **ci:** implement state-of-the-art GitHub Actions workflow ([c6ffbc1](https://github.com/karlorz/daily-login-assistant/commit/c6ffbc1a7ad1c09c525b400e6d768b8666d5fcb4))
+
 # [1.1.0](https://github.com/karlorz/daily-login-assistant/compare/v1.0.0...v1.1.0) (2025-09-27)
 
 

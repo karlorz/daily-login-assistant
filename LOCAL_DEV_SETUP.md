@@ -123,7 +123,7 @@ For interactive testing with visible browser:
 
 ```bash
 # Run manual test with Practice Test Automation site
-node test-login.js
+node scripts/test-login.js
 
 # Features:
 # - Uses dependency injection container
@@ -255,7 +255,7 @@ bun run test         # Run all tests (headless by default)
 bun run test:headless # Force headless mode
 bun run test:headed  # Force headed mode (debugging)
 bun run test:watch   # Watch mode for development
-node test-login.js   # Manual interactive test
+node scripts/test-login.js   # Manual interactive test
 
 # Testing - Traditional
 bun run test:jest    # Jest tests only
@@ -361,7 +361,7 @@ WEBHOOK_PORT=3002
 ### Development Workflow
 1. **Use localhost tests** for rapid iteration (`bun run test:headed`)
 2. **Use headless mode** for automated testing (`bun run test:headless`)
-3. **Use manual script** for interactive debugging (`node test-login.js`)
+3. **Use manual script** for interactive debugging (`node scripts/test-login.js`)
 4. **Check real sites** before deployment (Practice Test Automation included)
 
 ### CI/CD Integration
