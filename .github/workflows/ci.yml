@@ -40,7 +40,6 @@ jobs:
         with:
           # Use the Node.js version specified in package.json
           node-version-file: 'package.json'
-          cache: 'bun' # Enable Node.js cache for better performance
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -155,7 +154,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version-file: 'package.json'
-          cache: 'bun'
           # Set up .npmrc for publishing to npm
           registry-url: 'https://registry.npmjs.org'
 
