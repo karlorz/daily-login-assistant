@@ -10,9 +10,9 @@
 name: Publish Docker image
 
 on:
-  # push:
   release:
     types: [published]
+  workflow_dispatch:
 
 jobs:
   push_to_registries:
