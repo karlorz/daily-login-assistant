@@ -1,3 +1,10 @@
+## [1.2.6](https://github.com/karlorz/daily-login-assistant/compare/v1.2.5...v1.2.6) (2025-09-28)
+
+
+### Bug Fixes
+
+* add workflow-level permissions for release events ([98f0e14](https://github.com/karlorz/daily-login-assistant/commit/98f0e14d827f7877347025bec553bf8513d10f4b))
+
 ## [1.2.5](https://github.com/karlorz/daily-login-assistant/compare/v1.2.4...v1.2.5) (2025-09-28)
 
 
