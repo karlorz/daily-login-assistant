@@ -20,7 +20,7 @@ permissions:
 jobs:
   build-and-test:
     name: Build and Test
-    timeout-minutes: 12 # Further reduced with improved caching
+    timeout-minutes: 45 # Increased for browser automation tests
     runs-on: ubuntu-latest
     permissions:
       contents: read # for checkout
@@ -104,8 +104,17 @@ jobs:
       - name: Run tests
         run: bun run test:all
         env:
+          # CI environment detection
+          CI: true
+          # Force headless mode in CI
+          HEADLESS: true
+          # Increase timeouts for CI environment
+          CI_TIMEOUT_MULTIPLIER: 4
           # Enable GitHub reporter for better test failure annotations
           PLAYWRIGHT_TEST_REPORTER: 'github'
+          # Additional CI optimizations
+          PLAYWRIGHT_HEADLESS: true
+          DEBUG: pw:api
 
       - name: Build project
         run: bun run build
