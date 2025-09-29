@@ -79,6 +79,9 @@ bun run test:coverage      # Coverage report
 bun run profiles setup site user url  # Setup new profile
 bun run profiles list                  # List all profiles
 bun run profiles checkin-all          # Daily check-ins for all
+# Docker linting
+docker run --rm -i hadolint/hadolint < Dockerfile          # Dockerfile best practices
+docker run -t --rm -v ${PWD}:/app zavoloklom/dclint .      # Docker Compose linting
 
 # Build and deployment
 docker build -t daily-login-assistant .

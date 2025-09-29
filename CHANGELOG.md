@@ -1,3 +1,61 @@
+## [1.2.8](https://github.com/karlorz/daily-login-assistant/compare/v1.2.7...v1.2.8) (2025-09-28)
+
+
+### Bug Fixes
+
+* ci ([406f75e](https://github.com/karlorz/daily-login-assistant/commit/406f75ebdf216f78b45df0a2413416d0c267eec4))
+
+## [1.2.7](https://github.com/karlorz/daily-login-assistant/compare/v1.2.6...v1.2.7) (2025-09-28)
+
+
+### Bug Fixes
+
+* ci ([fba8a06](https://github.com/karlorz/daily-login-assistant/commit/fba8a066d384ec5e2806e99eefde4509f4ff711a))
+
+## [1.2.6](https://github.com/karlorz/daily-login-assistant/compare/v1.2.5...v1.2.6) (2025-09-28)
+
+
+### Bug Fixes
+
+* add workflow-level permissions for release events ([98f0e14](https://github.com/karlorz/daily-login-assistant/commit/98f0e14d827f7877347025bec553bf8513d10f4b))
+
+## [1.2.5](https://github.com/karlorz/daily-login-assistant/compare/v1.2.4...v1.2.5) (2025-09-28)
+
+
+### Bug Fixes
+
+* add multiple release event types to Docker workflow ([c05af46](https://github.com/karlorz/daily-login-assistant/commit/c05af46c592c231fdae928c258d7a37069edad01))
+
+## [1.2.4](https://github.com/karlorz/daily-login-assistant/compare/v1.2.3...v1.2.4) (2025-09-28)
+
+
+### Bug Fixes
+
+* add tag trigger to Docker publish workflow ([a516d52](https://github.com/karlorz/daily-login-assistant/commit/a516d528f6534f7fbfdc320b00d758692fdfb143))
+
+## [1.2.3](https://github.com/karlorz/daily-login-assistant/compare/v1.2.2...v1.2.3) (2025-09-28)
+
+
+### Bug Fixes
+
+* simplify Docker publish workflow triggers ([a1369c6](https://github.com/karlorz/daily-login-assistant/commit/a1369c62a44c21953dca7942d3e7d24e6bcebbe3))
+
+## [1.2.2](https://github.com/karlorz/daily-login-assistant/compare/v1.2.1...v1.2.2) (2025-09-28)
+
+
+### Bug Fixes
+
+* docker ([f999649](https://github.com/karlorz/daily-login-assistant/commit/f999649fd80e0c365e99d6705dfed7b0ae7813d1))
+* Squashed commits from ci-1 ([1aa034a](https://github.com/karlorz/daily-login-assistant/commit/1aa034aa5e9deda80411be2822bec38f4aa2b347))
+
+## [1.2.1](https://github.com/karlorz/daily-login-assistant/compare/v1.2.0...v1.2.1) (2025-09-28)
+
+
+### Bug Fixes
+
+* resolve Playwright timeout issues in GitHub Actions CI environment ([42a251b](https://github.com/karlorz/daily-login-assistant/commit/42a251bcb01cd11c5021534db1fe3e53ed645bcc))
+* resolve Playwright timeout issues in GitHub Actions CI environment ([22c8d3c](https://github.com/karlorz/daily-login-assistant/commit/22c8d3cf4f1ae076c6036dfa13aa9d4046111805))
+
 # [1.2.0](https://github.com/karlorz/daily-login-assistant/compare/v1.1.0...v1.2.0) (2025-09-28)
 
 
