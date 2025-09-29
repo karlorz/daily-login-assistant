@@ -7,7 +7,6 @@ export default {
   },
   testMatch: ['**/__tests__/**/*.ts', '**/?(*.)+(spec|test).ts'],
   testPathIgnorePatterns: ['\\.d\\.ts$', 'worktrees/'],
-  modulePathIgnorePatterns: ['worktrees/'],
   collectCoverageFrom: ['src/**/*.ts'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
