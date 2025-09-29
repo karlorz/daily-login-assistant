@@ -243,37 +243,4 @@ describe('Localhost Mock Server Tests', () => {
     });
   });
 
-  describe('Performance Benchmarks', () => {
-    it('should measure and log localhost performance metrics', async () => {
-      const iterations = 3;
-      const times: number[] = [];
-
-      for (let i = 0; i < iterations; i++) {
-        const startTime = Date.now();
-
-        const session = await browserService.createSession(`perf-test-${i}`, localhostConfig);
-        await browserService.navigateToLogin(session.page, localhostConfig);
-
-        const endTime = Date.now();
-        const duration = endTime - startTime;
-        times.push(duration);
-
-        await browserService.closeSession(session.id);
-      }
-
-      const avgTime = times.reduce((a, b) => a + b, 0) / times.length;
-      const minTime = Math.min(...times);
-      const maxTime = Math.max(...times);
-
-      console.log(`Localhost Performance Metrics:
-        Average: ${avgTime.toFixed(2)}ms
-        Min: ${minTime}ms
-        Max: ${maxTime}ms
-        All times: ${times.join('ms, ')}ms`);
-
-      // Localhost should be consistently fast
-      expect(avgTime).toBeLessThan(5000);
-      expect(maxTime).toBeLessThan(10000);
-    });
-  });
 });

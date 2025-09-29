@@ -7,8 +7,8 @@ services:
       dockerfile: Dockerfile
       args:
         DEBIAN_FRONTEND: noninteractive
-        TZ: Japan
-        DOCKER_IMAGE_NAME_TEMPLATE: "mcr.microsoft.com/playwright:v1.55.0-noble"
+        TZ: Asia/Hong_Kong
+        DOCKER_IMAGE_NAME_TEMPLATE: "mcr.microsoft.com/playwright:v1.55.1-noble"
     container_name: daily-login-assistant
     volumes:
       - profiles_data:/app/profiles
@@ -20,7 +20,7 @@ services:
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-      TZ: Japan
+      TZ: Asia/Hong_Kong
     ports:
       - '127.0.0.1:8001:3001'
     working_dir: /app
