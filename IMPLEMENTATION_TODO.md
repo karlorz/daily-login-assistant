@@ -28,48 +28,46 @@
 
 ## 🎯 HIGH PRIORITY TASKS
 
-### 1. Documentation Merge from Worktrees ⚠️ CRITICAL
-**Status**: Pending
-**Estimated Time**: 2-3 hours
-**Priority**: HIGH
+### 1. Increase Unit Test Coverage to 80%+ 🧪
+**Status**: In Progress (currently 52.14%)
+**Estimated Time**: 4-6 hours
+**Priority**: CRITICAL
 
-**Task**: Merge documentation from `worktrees/docs-1/` into main branch
+**Target Services** (currently under-tested):
+- [ ] **PlaywrightBrowserService**: 58.97% → 80%+ (add ~20 tests)
+  - Test session creation/cleanup
+  - Test navigation and element finding
+  - Test login flow automation
+  - Test screenshot functionality
 
-**Expected Files** (mentioned in CLAUDE.md but missing from main):
-- [ ] `ARCHITECTURE.md` - Detailed architecture and component overview
-- [ ] `API-REFERENCE.md` - Complete API documentation and service interfaces
-- [ ] `DEPLOYMENT.md` - Production deployment instructions
-- [ ] `CONFIG.md` - Configuration options and setup instructions
-- [ ] `USER-GUIDE.md` - Complete user guide and usage instructions
+- [ ] **UserGuidedLoginService**: 0% → 60%+ (add ~15 tests)
+  - Test guided login session opening
+  - Test profile management
+  - Test cookie persistence
+
+- [ ] **Main Application (index.ts)**: 0% → 70%+ (add ~12 tests)
+  - Test initialization flow
+  - Test scheduling logic
+  - Test graceful shutdown
+  - Test error handling
 
 **Steps**:
 ```bash
-# 1. Check worktree contents
-ls -la worktrees/docs-1/
+# 1. Create additional unit test files
+touch __tests__/unit/browser/playwright-browser.service.test.ts
+touch __tests__/unit/browser/user-guided-login.service.test.ts
+touch __tests__/unit/app.test.ts
 
-# 2. Review documentation files
-cat worktrees/docs-1/ARCHITECTURE.md
-cat worktrees/docs-1/API-REFERENCE.md
-# ... review other files
+# 2. Run tests with coverage to track progress
+bun run test:coverage
 
-# 3. Copy to main branch
-cp worktrees/docs-1/*.md .
-
-# 4. Commit documentation
-git add *.md
-git commit -m "docs: merge comprehensive documentation from worktree
-
-- Add ARCHITECTURE.md with component overview
-- Add API-REFERENCE.md with service interfaces
-- Add DEPLOYMENT.md with production instructions
-- Add CONFIG.md with configuration guide
-- Add USER-GUIDE.md with usage instructions"
-
-# 5. Push to feat/Automation branch
-git push origin feat/Automation
+# 3. Commit when reaching milestones
+git add __tests__/unit
+git commit -m "test: increase coverage to 80%+ for browser services"
 ```
 
-**Impact**: Completes documentation, raises overall grade to A+
+**Target**: 80%+ overall statement coverage
+**Impact**: Production-ready code quality, reduces bugs
 
 ---
 
@@ -119,34 +117,66 @@ export class EnvironmentValidator {
 
 ---
 
-### 3. Increase Unit Test Coverage to 80%+ 🧪
-**Status**: In Progress (currently 52.14%)
-**Estimated Time**: 4-6 hours
-**Priority**: MEDIUM-HIGH
+### 3. Circuit Breaker Implementation 🛡️
+**Status**: Not Started
+**Estimated Time**: 2-3 hours
+**Priority**: HIGH
 
-**Target Services** (currently under-tested):
-- [ ] **PlaywrightBrowserService**: 58.97% → 80%+ (add ~20 tests)
-- [ ] **UserGuidedLoginService**: 0% → 60%+ (add ~15 tests)
-- [ ] **DevWebhookListener**: 0% → 50%+ (add ~10 tests)
-- [ ] **Main Application (index.ts)**: 0% → 70%+ (add ~12 tests)
+**Task**: Add circuit breaker for failing websites to prevent resource waste
 
-**Steps**:
-```bash
-# 1. Create additional unit test files
-touch __tests__/unit/browser/playwright-browser.service.test.ts
-touch __tests__/unit/browser/user-guided-login.service.test.ts
-touch __tests__/unit/dev/webhook-listener.service.test.ts
-touch __tests__/unit/app.test.ts
+**Implementation**:
+```typescript
+// src/infrastructure/reliability/circuit-breaker.service.ts
 
-# 2. Run tests with coverage to track progress
-bun run test:coverage
+@injectable()
+export class CircuitBreaker {
+  private failures = new Map<string, number>();
+  private openCircuits = new Map<string, number>();
+  private readonly threshold = 5;
+  private readonly resetTime = 300000; // 5 minutes
 
-# 3. Commit when reaching milestones
-git add __tests__/unit
-git commit -m "test: increase coverage to 80%+ for browser services"
+  recordFailure(websiteId: string): void {
+    const count = (this.failures.get(websiteId) || 0) + 1;
+    this.failures.set(websiteId, count);
+
+    if (count >= this.threshold) {
+      this.openCircuit(websiteId);
+    }
+  }
+
+  isCircuitOpen(websiteId: string): boolean {
+    const openTime = this.openCircuits.get(websiteId);
+    if (!openTime) return false;
+
+    if (Date.now() - openTime > this.resetTime) {
+      this.closeCircuit(websiteId);
+      return false;
+    }
+    return true;
+  }
+
+  private openCircuit(websiteId: string): void {
+    this.openCircuits.set(websiteId, Date.now());
+  }
+
+  private closeCircuit(websiteId: string): void {
+    this.openCircuits.delete(websiteId);
+    this.failures.set(websiteId, 0);
+  }
+}
 ```
 
-**Target**: 80%+ overall statement coverage
+**Integration**: `src/infrastructure/browser/login-engine.service.ts:27`
+
+**Steps**:
+1. [ ] Create circuit breaker service
+2. [ ] Register in DI container
+3. [ ] Integrate with login engine (check before processing)
+4. [ ] Add notifications for circuit open/close events
+5. [ ] Write comprehensive unit tests (10-15 tests)
+6. [ ] Add integration test for circuit breaker behavior
+
+**Impact**: Prevents wasted resources on consistently failing sites
 
 ---
 
@@ -195,47 +225,6 @@ echo "# test change" >> config/websites.yaml
 
 ---
 
-### 6. Circuit Breaker Implementation 🛡️
-**Status**: Not Started
-**Estimated Time**: 2-3 hours
-**Priority**: MEDIUM
-
-**Task**: Add circuit breaker for failing websites
-
-**Implementation**:
-```typescript
-// src/infrastructure/reliability/circuit-breaker.service.ts
-
-export class CircuitBreaker {
-  private failures = new Map<string, number>();
-  private readonly threshold = 5;
-  private readonly resetTime = 300000; // 5 minutes
-
-  recordFailure(websiteId: string): void {
-    const count = (this.failures.get(websiteId) || 0) + 1;
-    this.failures.set(websiteId, count);
-
-    if (count >= this.threshold) {
-      this.openCircuit(websiteId);
-    }
-  }
-
-  isCircuitOpen(websiteId: string): boolean {
-    return this.failures.get(websiteId) >= this.threshold;
-  }
-}
-```
-
-**Integration**: `src/infrastructure/browser/login-engine.service.ts:27`
-
-**Steps**:
-1. [ ] Create circuit breaker service
-2. [ ] Integrate with login engine
-3. [ ] Add notifications for circuit open/close
-4. [ ] Write unit tests
-5. [ ] Update documentation
-
----
 
 ## 📦 LOW PRIORITY TASKS
 
@@ -313,9 +302,13 @@ export class ScreenshotManager {
 - [x] All tests passing (108/108)
 - [x] Coverage reports generated
 - [x] PR description updated
-- [ ] Documentation merged from worktree
+- [ ] Test coverage increased to 80%+ (currently 52.14%)
 - [ ] Environment variable validation added
-- [ ] Manual testing completed
+- [ ] Circuit breaker implemented and tested
+- [ ] Enhanced metrics and reporting
+- [ ] Manual end-to-end testing completed
+- [ ] All new features have unit tests
+- [ ] Integration tests updated
 - [ ] CHANGELOG.md reviewed
 - [ ] Version bumped (semantic-release will handle)
 
@@ -377,42 +370,73 @@ git push origin feat/Automation
 - [x] PROFILE_SYSTEM.md (multi-profile guide)
 - [x] LOCAL_DEV_SETUP.md (development setup)
 - [x] CHANGELOG.md (automated)
-- [ ] ARCHITECTURE.md (in worktree)
-- [ ] API-REFERENCE.md (in worktree)
-- [ ] DEPLOYMENT.md (in worktree)
-- [ ] CONFIG.md (in worktree)
-- [ ] USER-GUIDE.md (in worktree)
+- [x] IMPLEMENTATION_TODO.md (this file)
 
-### Additional Documentation Needs
-- [ ] Add code comments for complex logic
-- [ ] Create architecture diagrams
-- [ ] Add sequence diagrams for login flow
-- [ ] Create troubleshooting guide
-- [ ] Add FAQ section
-- [ ] Create video tutorials (optional)
+### Code Documentation Needs (In-Code)
+- [ ] Add JSDoc comments for complex functions
+- [ ] Document circuit breaker behavior
+- [ ] Add inline comments for retry logic
+- [ ] Document environment variable requirements
+- [ ] Add examples in service interfaces
 
 ---
 
 ## 🎯 NEXT IMMEDIATE STEPS (Recommended Order)
 
+### Sprint 1: Testing & Validation (Focus Now)
 1. **✅ DONE**: Add unit tests for service layer (Recommendation #2)
-2. **NEXT**: Merge documentation from worktrees (1-2 hours) ⚠️
+2. **NEXT**: Increase test coverage to 80%+ (4-6 hours) ⚠️ CRITICAL
+   - Focus on PlaywrightBrowserService first
+   - Then UserGuidedLoginService
+   - Finally main application
 3. **THEN**: Add environment variable validation (1-2 hours)
-4. **THEN**: Increase test coverage to 80%+ (4-6 hours)
-5. **FINALLY**: Manual testing and PR merge
+4. **THEN**: Manual end-to-end testing with real websites
+
+### Sprint 2: Reliability Features
+5. **NEXT**: Circuit breaker implementation (2-3 hours)
+6. **THEN**: Enhanced metrics and reporting (2-3 hours)
+7. **THEN**: Configuration hot reload testing (1-2 hours)
+
+### Sprint 3: Production Readiness
+8. **FINALLY**: Final integration testing
+9. **REVIEW**: Code review and cleanup
+10. **MERGE**: PR #3 to main branch
 
 ---
 
 ## 💡 NOTES
 
-- **Worktree Warning**: Do NOT remove `worktrees/` directory - contains active git worktrees
+- **Worktree Warning**: Do NOT remove `worktrees/` directory - contains active git worktrees (used in separate sessions)
 - **Test Execution**: Use `bun run test:jest` for unit tests (Bun's test runner has Jest mocking limitations)
 - **CI/CD**: All tests run automatically on push to PR
 - **Semantic Release**: Follows conventional commits for versioning
+- **Focus**: Functionality and testing first, documentation second
+- **Target Coverage**: 80%+ before merging to main
+
+---
+
+## 🎯 CURRENT SPRINT FOCUS
+
+**Sprint Goal**: Achieve production-ready code quality through comprehensive testing and reliability features
+
+**This Week**:
+1. ⚠️ Increase test coverage from 52% → 80%+
+2. ⚠️ Add environment variable validation
+3. ⚠️ Implement circuit breaker pattern
+4. ⚠️ Manual end-to-end testing
+
+**Success Criteria**:
+- [ ] 80%+ test coverage
+- [ ] All critical paths tested
+- [ ] Circuit breaker prevents resource waste
+- [ ] Environment validation catches misconfigurations
+- [ ] Manual testing shows reliable operation
 
 ---
 
 **Last Updated**: 2025-10-04
 **Current Version**: 1.2.8
 **Current Branch**: feat/Automation
-**Next Version**: 1.3.0 (minor) or 2.0.0 (major) based on commits
+**Next Version**: 1.3.0 (minor - new features) or 2.0.0 (major - breaking changes)
+**Tests**: 108 passing (85 unit, 23 integration)
+**Coverage**: 52.14% (target: 80%+)
