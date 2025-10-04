@@ -4,6 +4,7 @@ import { IConfigService, INotificationService, IMonitoringService, ILoginService
 import { TYPES } from './core/types';
 import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
 import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
+import { CookieWebApiService } from './infrastructure/web/cookie-web-api.service';
 import { LoginTask, TaskPriority } from './core/entities/login-task.entity';
 import path from 'path';
 
@@ -18,9 +19,15 @@ async function main() {
     const loginService = container.get<ILoginService>(TYPES.LoginService);
     const _taskQueue = container.get<InMemoryTaskQueue>(TYPES.TaskQueue);
 
-    // Start webhook listener in development
+    // Start Cookie Web API for profile management (takes port 3001)
+    console.log('🌐 Starting Cookie Upload Web API...');
+    const cookieWebApi = container.get<CookieWebApiService>(TYPES.CookieWebApi);
+    await cookieWebApi.start();
+    console.log('');
+
+    // Start webhook listener in development (only if cookie web API is not using port 3001)
     let webhookListener: DevWebhookListener | null = null;
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && process.env.ENABLE_WEBHOOK_LISTENER === 'true') {
       try {
         webhookListener = container.get<DevWebhookListener>(TYPES.DevWebhookListener);
         await webhookListener.start();

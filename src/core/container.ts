@@ -10,6 +10,7 @@ import { DevWebhookListener } from "../infrastructure/dev/webhook-listener.servi
 import { PlaywrightBrowserService } from "../infrastructure/browser/playwright-browser.service";
 import { LoginEngine } from "../infrastructure/browser/login-engine.service";
 import { CircuitBreaker } from "../infrastructure/reliability/circuit-breaker.service";
+import { CookieWebApiService } from "../infrastructure/web/cookie-web-api.service";
 
 // Import interfaces
 import {
@@ -39,9 +40,12 @@ container.bind<ILoginService>(TYPES.LoginService).to(LoginEngine);
 // Reliability Services
 container.bind<CircuitBreaker>(TYPES.CircuitBreaker).to(CircuitBreaker).inSingletonScope();
 
-// Development Services (only in development)
-if (process.env.NODE_ENV === 'development') {
-  container.bind<DevWebhookListener>(TYPES.DevWebhookListener).to(DevWebhookListener);
-}
+// Development Services (disabled - cookie web API uses port 3001)
+// if (process.env.NODE_ENV === 'development') {
+//   container.bind<DevWebhookListener>(TYPES.DevWebhookListener).to(DevWebhookListener);
+// }
+
+// Web Services (always available)
+container.bind<CookieWebApiService>(TYPES.CookieWebApi).to(CookieWebApiService).inSingletonScope();
 
 export { container };

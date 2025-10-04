@@ -12,4 +12,7 @@ export const TYPES = {
 
   // Development Services
   DevWebhookListener: Symbol.for("DevWebhookListener"),
+
+  // Web Services
+  CookieWebApi: Symbol.for("CookieWebApi"),
 } as const;

@@ -11,6 +11,8 @@ import { UserGuidedLoginService } from '../dist/infrastructure/browser/user-guid
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';
+import { execSync } from 'child_process';
+import os from 'os';
 
 dotenv.config({ path: '.env.development' });
 
@@ -18,6 +20,55 @@ class ProfileManager {
   constructor() {
     this.service = new UserGuidedLoginService();
     this.profilesDir = path.join(process.cwd(), 'profiles', 'user-guided');
+    this.notificationUrls = process.env.NOTIFICATION_URLS || '';
+    this.shoutrrPath = this.findShoutrrPath();
+  }
+
+  /**
+   * Find shoutrrr binary path
+   */
+  findShoutrrPath() {
+    const possiblePaths = [
+      path.join(os.homedir(), '.local', 'bin', 'shoutrrr'),
+      '/usr/local/bin/shoutrrr',
+      '/usr/bin/shoutrrr',
+    ];
+
+    for (const p of possiblePaths) {
+      if (fs.existsSync(p)) {
+        return p;
+      }
+    }
+
+    // Try system PATH
+    try {
+      execSync('which shoutrrr', { stdio: 'pipe' });
+      return 'shoutrrr';
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Send notification via shoutrrr
+   */
+  async sendNotification(title, message) {
+    if (!this.notificationUrls) {
+      // Notifications disabled
+      return;
+    }
+
+    if (!this.shoutrrPath) {
+      console.warn('⚠️  Shoutrrr not found - skipping notification');
+      return;
+    }
+
+    try {
+      const cmd = `${this.shoutrrPath} send --url "${this.notificationUrls}" --title "${title}" --message "${message}"`;
+      execSync(cmd, { stdio: 'pipe' });
+    } catch (error) {
+      console.warn('⚠️  Failed to send notification:', error.message);
+    }
   }
 
   /**
@@ -47,9 +98,23 @@ class ProfileManager {
         });
 
         console.log('✅ Profile setup completed successfully!');
+
+        // Send success notification
+        await this.sendNotification(
+          `✅ Profile Setup Success - ${profileId}`,
+          `Successfully set up profile for ${site} (${user})`
+        );
+
         return true;
       } else {
         console.log('❌ Profile setup failed:', result.message);
+
+        // Send failure notification
+        await this.sendNotification(
+          `❌ Profile Setup Failed - ${profileId}`,
+          `Failed to set up profile: ${result.message}`
+        );
+
         return false;
       }
     } catch (error) {
@@ -96,13 +161,35 @@ class ProfileManager {
       if (success) {
         console.log(`✅ Daily check-in completed: ${profileId}`);
         await this.updateLastCheckin(profileId);
+
+        // Send success notification
+        await this.sendNotification(
+          `✅ Check-in Success - ${profileId}`,
+          `Daily check-in completed successfully for ${site} (${user})`
+        );
+
         return true;
       } else {
         console.log(`❌ Daily check-in failed: ${profileId}`);
+
+        // Send session expiration notification with recovery instructions
+        const recoveryCommand = `bun run profiles setup ${site} ${user} ${loginUrl}`;
+        await this.sendNotification(
+          `🔴 Session Expired - ${profileId}`,
+          `Session expired. Please re-authenticate.\n\nProfile: ${profileId}\nSite: ${site}\nUser: ${user}\n\nRecovery Command:\n${recoveryCommand}`
+        );
+
         return false;
       }
     } catch (error) {
       console.error(`❌ Daily check-in error for ${profileId}:`, error.message);
+
+      // Send error notification
+      await this.sendNotification(
+        `❌ Check-in Error - ${profileId}`,
+        `Error during check-in: ${error.message}`
+      );
+
       return false;
     }
   }
@@ -188,10 +275,30 @@ class ProfileManager {
 
     const successful = results.filter(r => r.success).length;
     const failed = results.filter(r => !r.success).length;
+    const successRate = Math.round((successful / results.length) * 100);
 
     console.log(`✅ Successful: ${successful}`);
     console.log(`❌ Failed: ${failed}`);
-    console.log(`📈 Success Rate: ${Math.round((successful / results.length) * 100)}%`);
+    console.log(`📈 Success Rate: ${successRate}%`);
+
+    // Send summary notification
+    const successfulProfiles = results.filter(r => r.success).map(r => r.profileId);
+    const failedProfiles = results.filter(r => !r.success).map(r => r.profileId);
+
+    let summaryMessage = `✅ Successful: ${successful}\n❌ Failed: ${failed}\n📈 Success Rate: ${successRate}%`;
+
+    if (successfulProfiles.length > 0) {
+      summaryMessage += `\n\nSuccessful Profiles:\n${successfulProfiles.map(p => `  • ${p}`).join('\n')}`;
+    }
+
+    if (failedProfiles.length > 0) {
+      summaryMessage += `\n\nFailed Profiles:\n${failedProfiles.map(p => `  • ${p}`).join('\n')}`;
+    }
+
+    await this.sendNotification(
+      '📊 Daily Check-in Summary',
+      summaryMessage
+    );
 
     return results;
   }

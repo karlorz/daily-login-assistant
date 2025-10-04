@@ -36,10 +36,61 @@
 
 ## 🎯 HIGH PRIORITY TASKS
 
-### 1. User-Guided Login Testing & Validation ⭐ PRIMARY METHOD
-**Status**: Implemented, needs production validation
-**Estimated Time**: 2-3 hours
+### 1. Docker Deployment & Remote Cookie Extraction 🐳 ⭐ NEW PRIORITY
+**Status**: Architecture Designed, Implementation Pending
+**Estimated Time**: 4-6 hours
 **Priority**: CRITICAL
+
+**Architecture**: PWA + One-Click Script Launcher (see `PWA_SCRIPT_LAUNCHER.md`)
+
+**Why This Approach**:
+- ✅ **Lightweight** - 1KB script vs 50MB Electron app
+- ✅ **High Trust** - Browser-native download (HTTPS from trusted domain)
+- ✅ **Simple UX** - 2 steps: Download script → Double-click to run
+- ✅ **REST API Only** - No WebSocket client-side (internal only)
+- ✅ **Cross-Platform** - Auto-detects OS (Windows/macOS/Linux)
+- ✅ **Maintains Docker SSH + CDP Architecture** - No infrastructure changes
+
+**Implementation Tasks**:
+- [ ] Create script templates (`scripts/templates/launcher.sh`, `launcher.ps1`)
+- [ ] Implement script generation endpoint: `GET /api/session/{token}/script/{os}`
+- [ ] Add CDP cookie extractor service (connects to ssh-tunnel:9222)
+- [ ] Update web UI with OS detection and download button
+- [ ] Add `/api/tunnel-ready` notification endpoint
+- [ ] Update Docker Compose with SSH container
+- [ ] Configure SSH security (`authorized_keys` restrictions)
+- [ ] Test cross-platform (Windows/macOS/Linux)
+- [ ] Document user flow with screenshots
+
+**Documentation**:
+- See `PWA_SCRIPT_LAUNCHER.md` for complete implementation guide
+- See `CDP_REMOTE_DEBUGGING_ARCHITECTURE.md` for Docker + SSH + CDP design
+- See `docs/archive/` for rejected approaches (VNC, streaming, extensions)
+
+**Alternative Approaches (Rejected)**:
+- ❌ Browser Extension Method (too complex, requires installation)
+- ❌ VNC/Xvfb Streaming (too heavy, large Docker image)
+- ❌ Screenshot Streaming (uses WebSocket client-side)
+- ❌ Electron Launcher (50MB download, trust barrier)
+
+**Commands**:
+```bash
+# Test locally with Docker
+docker-compose up -d
+
+# Test script generation
+curl http://localhost:3001/api/session/{token}/script/macos
+
+# Test SSH tunnel manually
+ssh -R 9222:localhost:9222 -p 2222 tunnel@anyrouter.top
+```
+
+---
+
+### 2. User-Guided Login Testing & Validation ⭐ PRIMARY METHOD
+**Status**: Implemented and Validated ✅
+**Estimated Time**: COMPLETED
+**Priority**: COMPLETED
 
 **Why This is PRIMARY**:
 - ✅ **Resilient to website changes** - No selector updates needed
@@ -48,14 +99,21 @@
 - ✅ **Long-lived sessions** - Weeks/months without re-authentication
 - ✅ **Easy recovery** - Just login manually once to fix issues
 
-**Testing Tasks**:
+**Completed Tasks**:
 - [x] Profile creation and management (`bun run profiles setup`)
 - [x] Manual login session with profile persistence
 - [x] OAuth authentication flows (GitHub, Discord)
 - [x] **Manual end-to-end testing with YOUR actual websites** ✅
 - [x] **Verify session persistence over 1+ week period** ✅
-- [ ] **Test profile-based check-in automation**
-- [ ] **Document recovery process when sessions expire**
+- [x] **Test profile-based check-in automation** ✅
+- [x] **Document recovery process when sessions expire** ✅
+- [x] **Implement notification integration in profile-manager.js** ✅
+- [x] **Test session expiration notifications** ✅
+
+**Documentation**:
+- See `docs/SESSION_RECOVERY.md` for recovery process
+- See `docs/NOTIFICATION_SYSTEM.md` for notification configuration
+- See `docs/NOTIFICATION_IMPLEMENTATION.md` for implementation details
 
 **Commands**:
 ```bash
@@ -72,7 +130,7 @@ bun run dev  # Watch for scheduled tasks
 
 ---
 
-### 2. Increase Unit Test Coverage to 80%+ 🧪
+### 3. Increase Unit Test Coverage to 80%+ 🧪
 **Status**: In Progress (currently 74.12%, was 52.14%)
 **Estimated Time**: 1-2 hours remaining
 **Priority**: MEDIUM
@@ -102,7 +160,7 @@ bun run test:coverage  # 74.12% coverage, 205 tests passing
 
 ---
 
-### 3. Environment Variable Validation 🔒
+### 4. Environment Variable Validation 🔒
 **Status**: Not Started
 **Estimated Time**: 1 hour
 **Priority**: MEDIUM (less critical with user-guided login)
@@ -400,28 +458,36 @@ git push origin feat/Automation
 
 ## 🎯 NEXT IMMEDIATE STEPS (Recommended Order)
 
-### Sprint 1: Testing & Validation (Focus Now)
-1. **✅ DONE**: Add unit tests for service layer (Recommendation #2)
-2. **⭐ NEXT**: Manual testing with YOUR websites using user-guided login (2-3 hours) CRITICAL
-   - Test profile creation for each site
-   - Verify session persistence over 1+ week
-   - Test check-in automation
-   - Document recovery process
-3. **THEN**: Add UserGuidedLoginService unit tests (4-6 hours)
-   - **Priority: UserGuidedLoginService** (PRIMARY method)
-   - Optional: Main application tests
-   - Skip: Auto-fill specific tests (SECONDARY method)
-4. **FINALLY**: Add profile validation (1 hour)
+### Sprint 1: Docker Deployment & Remote Cookie Extraction (Focus Now) 🐳
+1. **⭐ NEXT**: Implement PWA + Script Launcher (4-6 hours) CRITICAL
+   - Create script templates (Windows/macOS/Linux)
+   - Implement script generation API endpoint
+   - Add CDP cookie extractor service
+   - Update web UI with download functionality
+   - Test cross-platform compatibility
+2. **THEN**: Configure Docker SSH container (1-2 hours)
+   - Update docker-compose.yml with SSH service
+   - Configure SSH security restrictions
+   - Test reverse tunnel connectivity
+3. **FINALLY**: End-to-end testing with remote Docker (2-3 hours)
+   - Deploy to anyrouter.top
+   - Test complete user flow
+   - Verify cookie extraction
+   - Document deployment process
 
-### Sprint 2: Reliability Features
-5. **NEXT**: Circuit breaker implementation (2-3 hours)
-6. **THEN**: Enhanced metrics and reporting (2-3 hours)
-7. **THEN**: Configuration hot reload testing (1-2 hours)
+### Sprint 2: Code Quality & Testing
+4. **NEXT**: Increase unit test coverage to 80%+ (1-2 hours)
+   - Focus on remaining edge cases
+   - Optional: Add index.ts tests
+5. **THEN**: Add profile validation (1 hour)
+   - Startup validation for missing profiles
+   - Helpful error messages with recovery instructions
 
 ### Sprint 3: Production Readiness
-8. **FINALLY**: Final integration testing
-9. **REVIEW**: Code review and cleanup
-10. **MERGE**: PR #3 to main branch
+6. **NEXT**: Configuration hot reload testing (1-2 hours)
+7. **THEN**: Final integration testing
+8. **REVIEW**: Code review and cleanup
+9. **MERGE**: PR to main branch
 
 ---
 
@@ -440,30 +506,31 @@ git push origin feat/Automation
 
 ## 🎯 CURRENT SPRINT FOCUS
 
-**Sprint Goal**: Achieve production-ready code quality through comprehensive testing and reliability features
+**Sprint Goal**: Implement Docker deployment with PWA + Script Launcher for remote cookie extraction
 
 **This Week**:
-1. ⭐ **Manual testing with YOUR websites using user-guided login** (PRIMARY)
-2. ⚠️ Add UserGuidedLoginService unit tests (80%+ coverage)
-3. ⚠️ Add profile validation at startup
-4. ⚠️ Implement circuit breaker pattern
-5. ⚠️ Increase overall test coverage to 80%+
+1. ⭐ **Implement PWA + One-Click Script Launcher** (CRITICAL)
+2. ⚠️ Configure Docker SSH container for reverse tunneling
+3. ⚠️ Add CDP cookie extractor service
+4. ⚠️ Test end-to-end remote deployment
+5. ⚠️ Document user flow and deployment process
 
 **Success Criteria**:
-- [x] ⭐ **User-guided login works reliably with YOUR actual websites** ✅
-- [x] ⭐ **Session persistence verified over 1+ week** ✅
-- [ ] ⭐ **Profile-based check-in automation working**
-- [x] 74.12% test coverage achieved (focus on UserGuidedLoginService) ✅
-- [x] All critical paths tested ✅
-- [x] Circuit breaker prevents resource waste ✅
-- [ ] Profile validation catches missing profiles with helpful messages
-- [x] Manual testing shows reliable operation ✅
+- [ ] ⭐ **Script templates created for Windows/macOS/Linux**
+- [ ] ⭐ **Script generation API endpoint working**
+- [ ] ⭐ **CDP cookie extraction via SSH tunnel functional**
+- [ ] ⭐ **Web UI downloads and runs script successfully**
+- [ ] ⭐ **Remote Docker deployment tested on anyrouter.top**
+- [ ] Cross-platform compatibility verified
+- [ ] User documentation with screenshots complete
+- [ ] Docker security hardened (SSH restrictions)
 
 ---
 
 **Last Updated**: 2025-10-04
 **Current Version**: 1.2.8
 **Current Branch**: feat/Automation
-**Next Version**: 1.3.0 (minor - new features) or 2.0.0 (major - breaking changes)
+**Next Version**: 2.0.0 (major - Docker deployment + PWA launcher)
 **Tests**: 205 passing (160 unit, 45 integration)
 **Coverage**: 74.12% (target: 80%+)
+**New Priority**: Docker Deployment & Remote Cookie Extraction 🐳

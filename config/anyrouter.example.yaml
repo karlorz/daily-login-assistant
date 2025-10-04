@@ -1,0 +1,67 @@
+# AnyRouter.top Configuration for Remote Docker Deployment
+
+## Cookie-Based Profile Configuration
+
+websites:
+  # AnyRouter.top - User 1 (Cookie-based authentication)
+  - id: anyrouter-user1
+    name: "AnyRouter User 1"
+    url: "https://anyrouter.top/"
+    enabled: true
+    method: "cookie-based"  # New: cookie-based instead of auto-fill
+    profile: "anyrouter-user1"  # Profile created via web UI
+    schedule:
+      time: "09:00"  # Daily check-in at 9 AM
+      timezone: "Asia/Hong_Kong"  # Adjust to your timezone
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # AnyRouter.top - User 2 (if you have multiple accounts)
+  - id: anyrouter-user2
+    name: "AnyRouter User 2"
+    url: "https://anyrouter.top/"
+    enabled: false  # Enable when ready
+    method: "cookie-based"
+    profile: "anyrouter-user2"
+    schedule:
+      time: "09:05"  # Stagger times to avoid rate limits
+      timezone: "Asia/Hong_Kong"
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Admin account example
+  - id: anyrouter-admin
+    name: "AnyRouter Admin"
+    url: "https://anyrouter.top/admin"  # Different URL for admin
+    enabled: false
+    method: "cookie-based"
+    profile: "anyrouter-admin"
+    schedule:
+      time: "09:10"
+      timezone: "Asia/Hong_Kong"
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true

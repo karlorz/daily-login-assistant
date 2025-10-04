@@ -1,0 +1,39 @@
+# Production Settings for Remote Docker Deployment
+# Optimized for headless server with cookie-based authentication
+
+settings:
+  global:
+    defaultTimeout: 30000
+    maxConcurrentTasks: 5
+    logLevel: "info"
+    retryFailedTasksAfter: 3600000  # 1 hour
+
+  notifications:
+    sendOnSuccess: true
+    sendOnFailure: true
+    sendDailySummary: true
+    summaryTime: "20:00"  # 8 PM Hong Kong time
+    timezone: "Asia/Hong_Kong"
+
+  browser:
+    headless: true  # REQUIRED for Docker
+    userDataDir: "./profiles"
+    slowMo: 50
+    args:
+      - "--no-sandbox"
+      - "--disable-dev-shm-usage"
+      - "--disable-gpu"
+      - "--disable-web-security"
+      - "--disable-features=VizDisplayCompositor"
+      - "--disable-blink-features=AutomationControlled"
+
+  scheduler:
+    enabled: true
+    checkInterval: 60000  # Check every minute
+    maxMissedSchedules: 3
+
+  reliability:
+    circuitBreaker:
+      enabled: true
+      failureThreshold: 5
+      resetTimeout: 300000  # 5 minutes

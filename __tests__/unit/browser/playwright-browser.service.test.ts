@@ -1,6 +1,5 @@
 import { PlaywrightBrowserService } from '../../../src/infrastructure/browser/playwright-browser.service';
 import { WebsiteConfig } from '../../../src/core/entities/website-config.entity';
-import { AccountCredentials } from '../../../src/core/entities/account-credentials.entity';
 import { chromium } from 'playwright';
 import fs from 'fs';
 

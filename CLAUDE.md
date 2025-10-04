@@ -324,7 +324,12 @@ docker run -d \
 **Rationale**: User-guided login provides zero-maintenance operation with universal auth support (OAuth, 2FA, etc.). Auto-fill code remains in the repository for reference but is not prioritized for new features or updates.
 
 ## Documentation
-- [**Multi-Profile System**](PROFILE_SYSTEM.md) - **NEW**: Unified site + user management
+- [**Docker Deployment Guide**](DOCKER_DEPLOYMENT.md) - **NEW**: Complete guide for headless Docker deployment
+- [**Deployment Checklist**](DEPLOYMENT_CHECKLIST.md) - **NEW**: Step-by-step deployment validation
+- [**Multi-Profile System**](PROFILE_SYSTEM.md) - Unified site + user management
+- [**Session Recovery Guide**](docs/SESSION_RECOVERY.md) - Person-in-the-loop recovery with shoutrrr notifications
+- [**Notification System Guide**](docs/NOTIFICATION_SYSTEM.md) - Testing and configuring notifications
+- [**Notification Implementation**](docs/NOTIFICATION_IMPLEMENTATION.md) - Complete implementation details and test results
 - [Simplified Solution Architecture](Final-Enterprise-Solution-Architecture.md) - Compact design for small-scale operations
 - [Original Technical Plan](daily-login-assistant-plan.md) - Initial planning and requirements
 - [Implementation Details](Detailed-Solution.md) - Basic implementation reference
