@@ -28,22 +28,61 @@
 
 ## 🎯 HIGH PRIORITY TASKS
 
-### 1. Increase Unit Test Coverage to 80%+ 🧪
-**Status**: In Progress (currently 52.14%)
-**Estimated Time**: 4-6 hours
+### 1. User-Guided Login Testing & Validation ⭐ PRIMARY METHOD
+**Status**: Implemented, needs production validation
+**Estimated Time**: 2-3 hours
 **Priority**: CRITICAL
 
-**Target Services** (currently under-tested):
-- [ ] **PlaywrightBrowserService**: 58.97% → 80%+ (add ~20 tests)
-  - Test session creation/cleanup
-  - Test navigation and element finding
-  - Test login flow automation
-  - Test screenshot functionality
+**Why This is PRIMARY**:
+- ✅ **Resilient to website changes** - No selector updates needed
+- ✅ **Universal authentication** - Handles OAuth, 2FA, SSO, anything
+- ✅ **Zero maintenance** - Website UI changes don't break the bot
+- ✅ **Long-lived sessions** - Weeks/months without re-authentication
+- ✅ **Easy recovery** - Just login manually once to fix issues
 
-- [ ] **UserGuidedLoginService**: 0% → 60%+ (add ~15 tests)
-  - Test guided login session opening
-  - Test profile management
-  - Test cookie persistence
+**Testing Tasks**:
+- [x] Profile creation and management (`bun run profiles setup`)
+- [x] Manual login session with profile persistence
+- [x] OAuth authentication flows (GitHub, Discord)
+- [ ] **Manual end-to-end testing with YOUR actual websites**
+- [ ] **Verify session persistence over 1+ week period**
+- [ ] **Test profile-based check-in automation**
+- [ ] **Document recovery process when sessions expire**
+
+**Commands**:
+```bash
+# Setup new profile (do this for each of your sites)
+bun run profiles setup <site-name> <user-name> <login-url>
+
+# Test existing profiles
+bun run profiles list
+bun run profiles checkin-all
+
+# Manual testing
+bun run dev  # Watch for scheduled tasks
+```
+
+---
+
+### 2. Increase Unit Test Coverage to 80%+ 🧪
+**Status**: In Progress (currently 52.14%)
+**Estimated Time**: 4-6 hours
+**Priority**: HIGH
+
+**Focus on User-Guided Login Components** ⭐:
+- [ ] **UserGuidedLoginService**: 0% → 80%+ (add ~20 tests) - PRIMARY
+  - Test profile creation and storage
+  - Test session persistence
+  - Test profile cleanup
+  - Test multiple profiles per site
+  - Test cookie management
+
+**Secondary Testing** (lower priority):
+- [ ] **PlaywrightBrowserService**: 58.97% → 70%+ (add ~10 tests)
+  - Only test features used by user-guided login
+  - Test session creation/cleanup
+  - Test screenshot functionality
+  - Skip auto-fill specific tests (low priority)
 
 - [ ] **Main Application (index.ts)**: 0% → 70%+ (add ~12 tests)
   - Test initialization flow
@@ -53,55 +92,86 @@
 
 **Steps**:
 ```bash
-# 1. Create additional unit test files
-touch __tests__/unit/browser/playwright-browser.service.test.ts
+# 1. Create additional unit test files (PRIORITY: UserGuidedLoginService)
 touch __tests__/unit/browser/user-guided-login.service.test.ts
 touch __tests__/unit/app.test.ts
+
+# Optional (only if needed):
+# touch __tests__/unit/browser/playwright-browser.service.test.ts
 
 # 2. Run tests with coverage to track progress
 bun run test:coverage
 
 # 3. Commit when reaching milestones
 git add __tests__/unit
-git commit -m "test: increase coverage to 80%+ for browser services"
+git commit -m "test: add comprehensive tests for user-guided login service"
 ```
 
-**Target**: 80%+ overall statement coverage
-**Impact**: Production-ready code quality, reduces bugs
+**Target**: 80%+ overall statement coverage (focus on user-guided components)
+**Impact**: Production-ready code quality for PRIMARY authentication method
 
 ---
 
-### 2. Environment Variable Validation 🔒
+### 3. Environment Variable Validation 🔒
 **Status**: Not Started
-**Estimated Time**: 1-2 hours
-**Priority**: HIGH
+**Estimated Time**: 1 hour
+**Priority**: MEDIUM (less critical with user-guided login)
 
-**Task**: Add startup validation for required credentials and configuration
+**Task**: Add startup validation for required profiles and configuration
+
+**Note**: With user-guided login as PRIMARY method, environment variable validation is less critical.
+Only validate credentials for sites using the SECONDARY auto-fill method.
 
 **Implementation**:
 ```typescript
-// src/infrastructure/config/env-validator.service.ts
+// src/infrastructure/config/profile-validator.service.ts
 
-export class EnvironmentValidator {
-  validateRequiredEnvVars(websiteConfigs: WebsiteConfig[]): ValidationResult {
-    const missing: string[] = [];
+export class ProfileValidator {
+  validateProfiles(websiteConfigs: WebsiteConfig[]): ValidationResult {
+    const missingProfiles: string[] = [];
+    const missingCredentials: string[] = [];
 
     for (const config of websiteConfigs) {
-      if (!process.env[config.credentials.username_env]) {
-        missing.push(config.credentials.username_env);
+      // PRIMARY: Check if user-guided profile exists
+      if (config.method === 'user-guided') {
+        const profileExists = this.checkProfileExists(config.profile);
+        if (!profileExists) {
+          missingProfiles.push(`${config.id}/${config.profile}`);
+        }
       }
-      if (!process.env[config.credentials.password_env]) {
-        missing.push(config.credentials.password_env);
+
+      // SECONDARY: Only validate credentials for auto-fill method
+      if (config.method === 'auto-fill') {
+        if (!process.env[config.credentials.username_env]) {
+          missingCredentials.push(config.credentials.username_env);
+        }
+        if (!process.env[config.credentials.password_env]) {
+          missingCredentials.push(config.credentials.password_env);
+        }
       }
     }
 
     return {
-      valid: missing.length === 0,
-      missing,
-      message: missing.length > 0
-        ? `Missing required environment variables: ${missing.join(', ')}`
-        : 'All required environment variables are set'
+      valid: missingProfiles.length === 0 && missingCredentials.length === 0,
+      missingProfiles,
+      missingCredentials,
+      message: this.buildValidationMessage(missingProfiles, missingCredentials)
     };
+  }
+
+  private buildValidationMessage(profiles: string[], credentials: string[]): string {
+    const messages: string[] = [];
+
+    if (profiles.length > 0) {
+      messages.push(`Missing profiles: ${profiles.join(', ')}`);
+      messages.push('Run: bun run profiles setup <site> <user> <url>');
+    }
+
+    if (credentials.length > 0) {
+      messages.push(`Missing credentials: ${credentials.join(', ')}`);
+    }
+
+    return messages.length > 0 ? messages.join('\n') : 'All profiles and credentials validated';
   }
 }
 ```
@@ -109,15 +179,24 @@ export class EnvironmentValidator {
 **Integration Point**: `src/index.ts:34` (after loading config)
 
 **Steps**:
-1. [ ] Create `env-validator.service.ts`
+1. [ ] Create `profile-validator.service.ts`
 2. [ ] Add validation to startup sequence
-3. [ ] Add helpful error messages
+3. [ ] Add helpful error messages with recovery instructions
 4. [ ] Write unit tests for validator
-5. [ ] Update documentation
+5. [ ] Prioritize profile validation over credential validation
+
+**Helpful Messages**:
+```
+❌ Missing profile: github-oauth/user1
+✅ To fix: bun run profiles setup github-oauth user1 https://github.com/login
+
+❌ Missing credentials: SIMPLE_SITE_USERNAME, SIMPLE_SITE_PASSWORD
+✅ To fix: Add to .env.development or use user-guided login instead
+```
 
 ---
 
-### 3. Circuit Breaker Implementation 🛡️
+### 4. Circuit Breaker Implementation 🛡️
 **Status**: Not Started
 **Estimated Time**: 2-3 hours
 **Priority**: HIGH
@@ -228,7 +307,31 @@ echo "# test change" >> config/websites.yaml
 
 ## 📦 LOW PRIORITY TASKS
 
-### 7. NPM Package Publishing 📤
+### 7. Auto-Fill Method Testing ⚠️ NOT RECOMMENDED
+**Status**: Implemented but LOW priority
+**Estimated Time**: 2-3 hours
+**Priority**: LOW (only test if you have simple sites)
+
+**Why LOW Priority**:
+- ⚠️ High maintenance when sites change
+- ⚠️ Only works with simple username/password
+- ⚠️ Breaks with every UI update
+- ⚠️ No OAuth/2FA support
+- ⚠️ Detection risk
+
+**If You Must Test Auto-Fill**:
+```bash
+# 1. Configure selectors in config/websites.yaml
+# 2. Add credentials to .env.development
+# 3. Test with simple, stable sites only
+# 4. Expect to update selectors regularly
+```
+
+**Recommendation**: Use user-guided login instead for ALL sites.
+
+---
+
+### 8. NPM Package Publishing 📤
 **Status**: CI/CD Configured, Not Published
 **Estimated Time**: 1 hour
 **Priority**: LOW
@@ -254,7 +357,7 @@ npm install -g daily-login-assistant-1.2.8.tgz
 
 ---
 
-### 8. Profile CLI Enhancements 🎨
+### 9. Profile CLI Enhancements 🎨
 **Status**: Basic Implementation Complete
 **Estimated Time**: 2-3 hours
 **Priority**: LOW
@@ -269,7 +372,7 @@ npm install -g daily-login-assistant-1.2.8.tgz
 
 ---
 
-### 9. Screenshot Management 📸
+### 10. Screenshot Management 📸
 **Status**: Screenshots Created, No Cleanup
 **Estimated Time**: 1-2 hours
 **Priority**: LOW
@@ -301,12 +404,14 @@ export class ScreenshotManager {
 ### Pre-Merge Checklist for PR #3
 - [x] All tests passing (108/108)
 - [x] Coverage reports generated
-- [x] PR description updated
+- [x] PR description updated with user-guided login priority
+- [ ] **Manual testing with YOUR websites using user-guided login** ⭐ CRITICAL
+- [ ] **Session persistence verified over 1+ week period** ⭐
 - [ ] Test coverage increased to 80%+ (currently 52.14%)
-- [ ] Environment variable validation added
+- [ ] UserGuidedLoginService has comprehensive unit tests
+- [ ] Profile validation added at startup
 - [ ] Circuit breaker implemented and tested
 - [ ] Enhanced metrics and reporting
-- [ ] Manual end-to-end testing completed
 - [ ] All new features have unit tests
 - [ ] Integration tests updated
 - [ ] CHANGELOG.md reviewed
@@ -385,12 +490,16 @@ git push origin feat/Automation
 
 ### Sprint 1: Testing & Validation (Focus Now)
 1. **✅ DONE**: Add unit tests for service layer (Recommendation #2)
-2. **NEXT**: Increase test coverage to 80%+ (4-6 hours) ⚠️ CRITICAL
-   - Focus on PlaywrightBrowserService first
-   - Then UserGuidedLoginService
-   - Finally main application
-3. **THEN**: Add environment variable validation (1-2 hours)
-4. **THEN**: Manual end-to-end testing with real websites
+2. **⭐ NEXT**: Manual testing with YOUR websites using user-guided login (2-3 hours) CRITICAL
+   - Test profile creation for each site
+   - Verify session persistence over 1+ week
+   - Test check-in automation
+   - Document recovery process
+3. **THEN**: Add UserGuidedLoginService unit tests (4-6 hours)
+   - **Priority: UserGuidedLoginService** (PRIMARY method)
+   - Optional: Main application tests
+   - Skip: Auto-fill specific tests (SECONDARY method)
+4. **FINALLY**: Add profile validation (1 hour)
 
 ### Sprint 2: Reliability Features
 5. **NEXT**: Circuit breaker implementation (2-3 hours)
@@ -410,8 +519,10 @@ git push origin feat/Automation
 - **Test Execution**: Use `bun run test:jest` for unit tests (Bun's test runner has Jest mocking limitations)
 - **CI/CD**: All tests run automatically on push to PR
 - **Semantic Release**: Follows conventional commits for versioning
-- **Focus**: Functionality and testing first, documentation second
+- **Focus**: User-guided login first, functionality and testing second, documentation third
 - **Target Coverage**: 80%+ before merging to main
+- **PRIMARY Method**: User-guided login (resilient, zero maintenance)
+- **SECONDARY Method**: Auto-fill (high maintenance, use only for simple sites)
 
 ---
 
@@ -420,16 +531,20 @@ git push origin feat/Automation
 **Sprint Goal**: Achieve production-ready code quality through comprehensive testing and reliability features
 
 **This Week**:
-1. ⚠️ Increase test coverage from 52% → 80%+
-2. ⚠️ Add environment variable validation
-3. ⚠️ Implement circuit breaker pattern
-4. ⚠️ Manual end-to-end testing
+1. ⭐ **Manual testing with YOUR websites using user-guided login** (PRIMARY)
+2. ⚠️ Add UserGuidedLoginService unit tests (80%+ coverage)
+3. ⚠️ Add profile validation at startup
+4. ⚠️ Implement circuit breaker pattern
+5. ⚠️ Increase overall test coverage to 80%+
 
 **Success Criteria**:
-- [ ] 80%+ test coverage
+- [ ] ⭐ **User-guided login works reliably with YOUR actual websites**
+- [ ] ⭐ **Session persistence verified over 1+ week**
+- [ ] ⭐ **Profile-based check-in automation working**
+- [ ] 80%+ test coverage (focus on UserGuidedLoginService)
 - [ ] All critical paths tested
 - [ ] Circuit breaker prevents resource waste
-- [ ] Environment validation catches misconfigurations
+- [ ] Profile validation catches missing profiles with helpful messages
 - [ ] Manual testing shows reliable operation
 
 ---
