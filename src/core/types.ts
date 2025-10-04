@@ -7,6 +7,9 @@ export const TYPES = {
   BrowserService: Symbol.for("BrowserService"),
   LoginService: Symbol.for("LoginService"),
 
+  // Reliability Services
+  CircuitBreaker: Symbol.for("CircuitBreaker"),
+
   // Development Services
   DevWebhookListener: Symbol.for("DevWebhookListener"),
 } as const;

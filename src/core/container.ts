@@ -9,6 +9,7 @@ import { InMemoryTaskQueue } from "../infrastructure/queue/in-memory-task-queue.
 import { DevWebhookListener } from "../infrastructure/dev/webhook-listener.service";
 import { PlaywrightBrowserService } from "../infrastructure/browser/playwright-browser.service";
 import { LoginEngine } from "../infrastructure/browser/login-engine.service";
+import { CircuitBreaker } from "../infrastructure/reliability/circuit-breaker.service";
 
 // Import interfaces
 import {
@@ -34,6 +35,9 @@ container.bind<InMemoryTaskQueue>(TYPES.TaskQueue).to(InMemoryTaskQueue);
 // Browser Automation Services
 container.bind<IBrowserService>(TYPES.BrowserService).to(PlaywrightBrowserService);
 container.bind<ILoginService>(TYPES.LoginService).to(LoginEngine);
+
+// Reliability Services
+container.bind<CircuitBreaker>(TYPES.CircuitBreaker).to(CircuitBreaker).inSingletonScope();
 
 // Development Services (only in development)
 if (process.env.NODE_ENV === 'development') {

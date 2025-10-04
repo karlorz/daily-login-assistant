@@ -1,5 +1,4 @@
 import { YamlConfigService } from '../../../src/infrastructure/config/yaml-config.service';
-import fs from 'fs';
 import { promises as fsPromises } from 'fs';
 import yaml from 'js-yaml';
 

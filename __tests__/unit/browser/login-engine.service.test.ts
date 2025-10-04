@@ -2,6 +2,7 @@ import { LoginEngine } from '../../../src/infrastructure/browser/login-engine.se
 import { IBrowserService } from '../../../src/core/interfaces/browser.service.interface';
 import { IConfigService } from '../../../src/core/interfaces/config.service.interface';
 import { INotificationService } from '../../../src/core/interfaces/notification.service.interface';
+import { CircuitBreaker } from '../../../src/infrastructure/reliability/circuit-breaker.service';
 import { LoginTask, TaskPriority } from '../../../src/core/entities/login-task.entity';
 import { WebsiteConfig, WebsiteSelectors, AutomationConfig, SecurityConfig } from '../../../src/core/entities/website-config.entity';
 import { BrowserSession } from '../../../src/core/entities/browser-session.entity';
@@ -11,6 +12,7 @@ describe('LoginEngine', () => {
   let mockBrowserService: jest.Mocked<IBrowserService>;
   let mockConfigService: jest.Mocked<IConfigService>;
   let mockNotificationService: jest.Mocked<INotificationService>;
+  let mockCircuitBreaker: jest.Mocked<CircuitBreaker>;
   let mockWebsiteConfig: WebsiteConfig;
   let mockSession: BrowserSession;
 
@@ -49,6 +51,21 @@ describe('LoginEngine', () => {
       sendErrorNotification: jest.fn(),
     } as any;
 
+    mockCircuitBreaker = {
+      recordFailure: jest.fn(),
+      recordSuccess: jest.fn(),
+      isCircuitOpen: jest.fn().mockReturnValue(false),
+      getFailureCount: jest.fn().mockReturnValue(0),
+      getStats: jest.fn().mockReturnValue({
+        websiteId: 'test-site',
+        failureCount: 0,
+        isOpen: false,
+      }),
+      getAllStats: jest.fn().mockReturnValue([]),
+      reset: jest.fn(),
+      resetAll: jest.fn(),
+    } as any;
+
     // Create test fixtures
     mockWebsiteConfig = new WebsiteConfig(
       'test-site',
@@ -71,7 +88,8 @@ describe('LoginEngine', () => {
     loginEngine = new LoginEngine(
       mockBrowserService,
       mockConfigService,
-      mockNotificationService
+      mockNotificationService,
+      mockCircuitBreaker
     );
   });
 

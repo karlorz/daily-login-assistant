@@ -25,7 +25,7 @@ describe('ShoutrrNotificationService', () => {
   const createMockProcess = (exitCode: number = 0, error?: Error) => {
     const mockProcess = {
       stderr: {
-        on: jest.fn((event, handler) => {
+        on: jest.fn((event, _handler) => {
           if (event === 'data') {
             // Simulate stderr data if needed
           }
