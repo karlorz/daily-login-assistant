@@ -22,13 +22,17 @@ Streamlined automated daily login assistant bot for small-scale operations (< 10
 - **Architecture**: Clean architecture with minimal dependency injection
 
 ## Key Features
-- ✅ **Simplified Architecture**: In-memory task queue for < 10 websites
-- ✅ **File-Based Config**: YAML configuration with hot-reloading
+- ✅ **Multi-Profile System**: Unified site + user management (`bun run profiles`)
+- ✅ **User-Guided Login**: Manual login once, automated forever (PRIMARY METHOD)
+- ✅ **PWA Remote Server**: Extract cookies + localStorage via SSH tunnel for remote deployment
+- ✅ **OAuth Support**: GitHub, Discord, LinuxDO, any authentication method (via PWA)
+- ✅ **Session Persistence**: Chrome profiles with weeks/months session lifetime
+- ✅ **localStorage Extraction**: Captures OAuth user data for remote sessions
+- ✅ **Batch Operations**: Daily check-ins for unlimited profiles
 - ✅ **Smart Notifications**: Real-time alerts via shoutrrr (Discord, Slack, email, etc.)
 - ✅ **Browser Automation**: Stealth Playwright with anti-detection
-- ✅ **Profile Management**: Local file-based Chrome profile storage
-- ✅ **Clean Logging**: Structured file-based logging
-- ✅ **Environment Variables**: Simple credential management
+- ✅ **Clean Logging**: Screenshots and structured logging
+- 🔒 **Auto-Fill Credentials**: Available but not maintained (legacy/reference only)
 
 ## Simplified Architecture
 ```
@@ -70,8 +74,22 @@ git push origin main       # Triggers CI/CD pipeline
 # Quality checks
 bun run lint               # oxlint (replaced ESLint)
 bun run typecheck          # TypeScript validation
+bun run local-ci           # Quick CI validation
 bun run test               # Run tests
 bun run test:coverage      # Coverage report
+
+# Multi-Profile System
+bun run profiles setup site user url  # Setup new profile (CLI-guided method)
+bun run profiles list                  # List all profiles
+bun run profiles checkin-all          # Daily check-ins for all
+
+# PWA Remote Server Method (Production)
+# IMPORTANT: Run these commands in Docker to match production environment
+docker compose up -d                                    # Start services
+# Visit http://localhost:8001 to create profiles via PWA UI
+docker exec daily-login-assistant bun run profiles list              # List profiles
+docker exec daily-login-assistant bun run profiles checkin site user url  # Test check-in
+docker exec daily-login-assistant bun run profiles checkin-all       # Test batch check-ins
 
 # Docker linting
 docker run --rm -i hadolint/hadolint < Dockerfile          # Dockerfile best practices
@@ -83,6 +101,79 @@ docker run -d daily-login-assistant
 
 # Set up notifications
 export NOTIFICATION_URLS="discord://token@channel,slack://token@channel"
+```
+
+## Development Workflow
+
+### Recommended Git Flow
+
+1. **Create Feature Branch**
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+2. **Make Changes & Commit**
+   ```bash
+   # Run quality checks before committing
+   bun run local-ci           # Runs lint, typecheck, and tests
+
+   # Stage and commit with conventional commits
+   git add .
+   bun run commit             # Interactive commit wizard
+   ```
+
+3. **Push & Create PR**
+   ```bash
+   git push origin feat/your-feature-name
+
+   # Create PR using GitHub CLI
+   gh pr create --title "feat: your feature description" --fill
+
+   # Or via web: https://github.com/your-repo/compare
+   ```
+
+4. **Keep PR Updated**
+   ```bash
+   # Sync with main branch
+   git fetch origin
+   git rebase origin/main     # Or: git merge origin/main
+
+   # Push updates (use --force-with-lease for rebase)
+   git push origin feat/your-feature-name --force-with-lease
+   ```
+
+5. **Merge PR**
+   ```bash
+   # After approval, squash and merge via GitHub UI
+   # Or via CLI:
+   gh pr merge --squash --delete-branch
+   ```
+
+### Best Practices
+
+- ✅ **Always work on feature branches** (never directly on `main`)
+- ✅ **Use conventional commits** for automatic versioning
+- ✅ **Run `bun run local-ci`** before pushing
+- ✅ **Keep PRs focused** on a single feature/fix
+- ✅ **Update PR description** if scope changes
+- ✅ **Sync with main regularly** to avoid conflicts
+- ✅ **Use PR template** for consistency
+
+### Quick Reference
+
+```bash
+# Start new feature
+git checkout -b feat/feature-name
+
+# Daily workflow
+bun run local-ci && git add . && bun run commit && git push
+
+# Update from main
+git fetch origin && git rebase origin/main
+
+# Create/update PR
+gh pr create --fill
+gh pr view --web
 ```
 
 ## CI/CD Pipeline
@@ -215,6 +306,9 @@ docker run -d \
 - [x] **Final Solution Documentation**
 - [x] **Migrated to Bun for improved performance**
 - [x] **CI Pipeline with oxlint (replaced ESLint)**
+- [x] **PWA Remote Server Method**: SSH tunnel + CDP for cookie + localStorage extraction
+- [x] **OAuth Support**: Tested with GitHub, LinuxDO, Discord OAuth flows
+- [x] **Session Persistence**: localStorage extraction for long-lived OAuth sessions
 - [ ] Phase 1: Core Infrastructure Implementation
 - [ ] Phase 2: Browser Automation & Configuration
 - [ ] Phase 3: Notifications & Error Handling
@@ -235,7 +329,21 @@ docker run -d \
 5. **Single Process**: No need for multiple workers
 6. **Simplified Architecture**: Clean but minimal dependency injection
 
+## Project Decisions
+
+### Authentication Methods
+- **PRIMARY**: User-Guided Login (actively maintained, recommended for all use cases)
+- **SECONDARY**: Auto-Fill Credentials (maintenance mode - kept as reference, not actively developed)
+
+**Rationale**: User-guided login provides zero-maintenance operation with universal auth support (OAuth, 2FA, etc.). Auto-fill code remains in the repository for reference but is not prioritized for new features or updates.
+
 ## Documentation
+- [**Docker Deployment Guide**](DOCKER_DEPLOYMENT.md) - **NEW**: Complete guide for headless Docker deployment
+- [**Deployment Checklist**](DEPLOYMENT_CHECKLIST.md) - **NEW**: Step-by-step deployment validation
+- [**Multi-Profile System**](PROFILE_SYSTEM.md) - Unified site + user management
+- [**Session Recovery Guide**](docs/SESSION_RECOVERY.md) - Person-in-the-loop recovery with shoutrrr notifications
+- [**Notification System Guide**](docs/NOTIFICATION_SYSTEM.md) - Testing and configuring notifications
+- [**Notification Implementation**](docs/NOTIFICATION_IMPLEMENTATION.md) - Complete implementation details and test results
 - [Simplified Solution Architecture](Final-Enterprise-Solution-Architecture.md) - Compact design for small-scale operations
 - [Original Technical Plan](daily-login-assistant-plan.md) - Initial planning and requirements
 - [Implementation Details](Detailed-Solution.md) - Basic implementation reference

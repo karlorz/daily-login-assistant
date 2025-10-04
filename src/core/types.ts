@@ -4,7 +4,15 @@ export const TYPES = {
   ConfigService: Symbol.for("ConfigService"),
   MonitoringService: Symbol.for("MonitoringService"),
   NotificationService: Symbol.for("NotificationService"),
+  BrowserService: Symbol.for("BrowserService"),
+  LoginService: Symbol.for("LoginService"),
+
+  // Reliability Services
+  CircuitBreaker: Symbol.for("CircuitBreaker"),
 
   // Development Services
   DevWebhookListener: Symbol.for("DevWebhookListener"),
+
+  // Web Services
+  CookieWebApi: Symbol.for("CookieWebApi"),
 } as const;
