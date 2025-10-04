@@ -23,13 +23,14 @@ Streamlined automated daily login assistant bot for small-scale operations (< 10
 
 ## Key Features
 - ✅ **Multi-Profile System**: Unified site + user management (`bun run profiles`)
-- ✅ **User-Guided Login**: Manual login once, automated forever
+- ✅ **User-Guided Login**: Manual login once, automated forever (PRIMARY METHOD)
 - ✅ **OAuth Support**: GitHub, Discord, any authentication method
 - ✅ **Session Persistence**: Chrome profiles with weeks/months session lifetime
 - ✅ **Batch Operations**: Daily check-ins for unlimited profiles
 - ✅ **Smart Notifications**: Real-time alerts via shoutrrr (Discord, Slack, email, etc.)
 - ✅ **Browser Automation**: Stealth Playwright with anti-detection
 - ✅ **Clean Logging**: Screenshots and structured logging
+- 🔒 **Auto-Fill Credentials**: Available but not maintained (legacy/reference only)
 
 ## Simplified Architecture
 ```
@@ -89,6 +90,79 @@ docker run -d daily-login-assistant
 
 # Set up notifications
 export NOTIFICATION_URLS="discord://token@channel,slack://token@channel"
+```
+
+## Development Workflow
+
+### Recommended Git Flow
+
+1. **Create Feature Branch**
+   ```bash
+   git checkout -b feat/your-feature-name
+   ```
+
+2. **Make Changes & Commit**
+   ```bash
+   # Run quality checks before committing
+   bun run local-ci           # Runs lint, typecheck, and tests
+
+   # Stage and commit with conventional commits
+   git add .
+   bun run commit             # Interactive commit wizard
+   ```
+
+3. **Push & Create PR**
+   ```bash
+   git push origin feat/your-feature-name
+
+   # Create PR using GitHub CLI
+   gh pr create --title "feat: your feature description" --fill
+
+   # Or via web: https://github.com/your-repo/compare
+   ```
+
+4. **Keep PR Updated**
+   ```bash
+   # Sync with main branch
+   git fetch origin
+   git rebase origin/main     # Or: git merge origin/main
+
+   # Push updates (use --force-with-lease for rebase)
+   git push origin feat/your-feature-name --force-with-lease
+   ```
+
+5. **Merge PR**
+   ```bash
+   # After approval, squash and merge via GitHub UI
+   # Or via CLI:
+   gh pr merge --squash --delete-branch
+   ```
+
+### Best Practices
+
+- ✅ **Always work on feature branches** (never directly on `main`)
+- ✅ **Use conventional commits** for automatic versioning
+- ✅ **Run `bun run local-ci`** before pushing
+- ✅ **Keep PRs focused** on a single feature/fix
+- ✅ **Update PR description** if scope changes
+- ✅ **Sync with main regularly** to avoid conflicts
+- ✅ **Use PR template** for consistency
+
+### Quick Reference
+
+```bash
+# Start new feature
+git checkout -b feat/feature-name
+
+# Daily workflow
+bun run local-ci && git add . && bun run commit && git push
+
+# Update from main
+git fetch origin && git rebase origin/main
+
+# Create/update PR
+gh pr create --fill
+gh pr view --web
 ```
 
 ## CI/CD Pipeline
@@ -240,6 +314,14 @@ docker run -d \
 4. **File-based Storage**: Local file system instead of databases
 5. **Single Process**: No need for multiple workers
 6. **Simplified Architecture**: Clean but minimal dependency injection
+
+## Project Decisions
+
+### Authentication Methods
+- **PRIMARY**: User-Guided Login (actively maintained, recommended for all use cases)
+- **SECONDARY**: Auto-Fill Credentials (maintenance mode - kept as reference, not actively developed)
+
+**Rationale**: User-guided login provides zero-maintenance operation with universal auth support (OAuth, 2FA, etc.). Auto-fill code remains in the repository for reference but is not prioritized for new features or updates.
 
 ## Documentation
 - [**Multi-Profile System**](PROFILE_SYSTEM.md) - **NEW**: Unified site + user management
