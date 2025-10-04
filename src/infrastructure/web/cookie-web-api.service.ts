@@ -8,6 +8,8 @@
 import { injectable } from 'inversify';
 import type { Server } from 'bun';
 import { CookieProfileService } from '../browser/cookie-profile.service.js';
+import { CDPCookieExtractorService } from '../browser/cdp-cookie-extractor.service.js';
+import { SessionManagerService } from './session-manager.service.js';
 import type { Cookie } from 'playwright';
 import path from 'path';
 
@@ -15,23 +17,34 @@ import path from 'path';
 export class CookieWebApiService {
   private server: Server | null = null;
   private cookieService: CookieProfileService;
+  private cdpExtractor: CDPCookieExtractorService;
+  private sessionManager: SessionManagerService;
   private publicDir: string;
   private port: number;
 
   constructor() {
     this.cookieService = new CookieProfileService();
+    this.cdpExtractor = new CDPCookieExtractorService();
+    this.sessionManager = new SessionManagerService();
     this.publicDir = path.join(process.cwd(), 'public');
     this.port = parseInt(process.env.WEB_API_PORT || '3001', 10);
+
+    // Cleanup expired sessions every 5 minutes
+    setInterval(() => {
+      const count = this.sessionManager.cleanupExpiredSessions();
+      if (count > 0) {
+        console.log(`🧹 Cleaned up ${count} expired session(s)`);
+      }
+    }, 300000);
   }
 
   /**
    * Start the web API server
    */
   async start(): Promise<void> {
-    const self = this;
     this.server = Bun.serve({
       port: this.port,
-      async fetch(req) {
+      fetch: async (req) => {
         const url = new URL(req.url);
         const method = req.method;
 
@@ -48,12 +61,12 @@ export class CookieWebApiService {
 
         // Serve static files
         if (method === 'GET' && !url.pathname.startsWith('/api/')) {
-          return await self.serveStaticFile(url.pathname, corsHeaders);
+          return await this.serveStaticFile(url.pathname, corsHeaders);
         }
 
         // API routes
         try {
-          const response = await self.handleApiRequest(url.pathname, method, req);
+          const response = await this.handleApiRequest(url.pathname, method, req);
           Object.entries(corsHeaders).forEach(([key, value]) => {
             response.headers.set(key, value);
           });
@@ -74,11 +87,16 @@ export class CookieWebApiService {
     console.log(`🌐 Cookie Upload Web API started on http://0.0.0.0:${this.port}`);
     console.log(`📋 Web UI: http://localhost:${this.port}/`);
     console.log(`📋 API Endpoints:`);
-    console.log(`   GET  /api/profiles              - List all profiles`);
-    console.log(`   POST /api/profiles/upload       - Upload cookies to create profile`);
-    console.log(`   POST /api/profiles/:id/test     - Test profile check-in`);
-    console.log(`   DELETE /api/profiles/:id        - Delete profile`);
-    console.log(`   GET  /health                    - Health check`);
+    console.log(`   GET  /api/profiles                    - List all profiles`);
+    console.log(`   POST /api/profiles/upload             - Upload cookies to create profile`);
+    console.log(`   POST /api/profiles/:id/test           - Test profile check-in`);
+    console.log(`   DELETE /api/profiles/:id              - Delete profile`);
+    console.log(`   POST /api/session/create              - Create new session`);
+    console.log(`   GET  /api/session/:token              - Get session status`);
+    console.log(`   GET  /api/session/:token/script/:os   - Download launcher script`);
+    console.log(`   POST /api/tunnel-ready                - Notify tunnel connected`);
+    console.log(`   POST /api/profiles/extract-from-tunnel - Extract cookies via CDP`);
+    console.log(`   GET  /health                          - Health check`);
   }
 
   /**
@@ -209,6 +227,188 @@ export class CookieWebApiService {
       );
     }
 
+    // Create new session
+    if (pathname === '/api/session/create' && method === 'POST') {
+      const session = this.sessionManager.createSession();
+      return new Response(
+        JSON.stringify({
+          success: true,
+          token: session.token,
+          expiresAt: session.expiresAt.toISOString()
+        }),
+        {
+          status: 201,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Get session status
+    const statusMatch = pathname.match(/^\/api\/session\/([^/]+)$/);
+    if (statusMatch && method === 'GET') {
+      const [, token] = statusMatch;
+
+      const session = this.sessionManager.getSession(token);
+      if (!session) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid or expired session' }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          token: session.token,
+          status: session.status,
+          createdAt: session.createdAt.toISOString(),
+          connectedAt: session.connectedAt?.toISOString(),
+          expiresAt: session.expiresAt.toISOString()
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Download launcher script
+    const scriptMatch = pathname.match(/^\/api\/session\/([^/]+)\/script\/([^/]+)$/);
+    if (scriptMatch && method === 'GET') {
+      const [, token, os] = scriptMatch;
+
+      const session = this.sessionManager.getSession(token);
+      if (!session) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid or expired session' }),
+          {
+            status: 401,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      return await this.generateLauncherScript(token, os);
+    }
+
+    // Tunnel ready notification
+    if (pathname === '/api/tunnel-ready' && method === 'POST') {
+      const body = await req.json() as { sessionToken: string; status: string };
+      const { sessionToken } = body;
+
+      const session = this.sessionManager.updateSession(sessionToken, {
+        status: 'connected',
+        debugPort: 'ssh-tunnel:9222',
+        connectedAt: new Date(),
+      });
+
+      if (!session) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid session' }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          success: true,
+          message: 'Tunnel connected successfully'
+        }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Extract cookies from debug tunnel
+    if (pathname === '/api/profiles/extract-from-tunnel' && method === 'POST') {
+      const body = await req.json() as {
+        sessionToken: string;
+        site: string;
+        user: string;
+        loginUrl: string;
+      };
+
+      const { sessionToken, site, user, loginUrl } = body;
+
+      const session = this.sessionManager.getSession(sessionToken);
+      if (!session || session.status !== 'connected') {
+        return new Response(
+          JSON.stringify({
+            error: 'Invalid session or tunnel not connected'
+          }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      try {
+        // Update session status
+        this.sessionManager.updateSession(sessionToken, {
+          status: 'extracting',
+        });
+
+        // Extract cookies and localStorage via CDP
+        const debugPort = session.debugPort || 'ssh-tunnel:9222';
+        const storageState = await this.cdpExtractor.extractCookiesFromDebugPort(
+          debugPort,
+          loginUrl
+        );
+
+        // Create profile from storage state
+        const result = await this.cookieService.createProfileFromCookies(
+          site,
+          user,
+          loginUrl,
+          storageState.cookies,
+          storageState
+        );
+
+        // Update session status
+        this.sessionManager.updateSession(sessionToken, {
+          status: 'completed',
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            profileId: result.profileId,
+            cookies: storageState.cookies.length,
+            message: 'Profile created successfully'
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      } catch (error) {
+        // Update session status
+        this.sessionManager.updateSession(sessionToken, {
+          status: 'failed',
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+
     return new Response('Not Found', { status: 404 });
   }
 
@@ -267,5 +467,67 @@ export class CookieWebApiService {
       '.svg': 'image/svg+xml',
     };
     return contentTypes[ext] || 'application/octet-stream';
+  }
+
+  /**
+   * Generate launcher script for specific OS
+   */
+  private async generateLauncherScript(token: string, os: string): Promise<Response> {
+    // Validate OS
+    if (!['macos', 'linux', 'windows'].includes(os)) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid OS. Must be macos, linux, or windows' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
+    // Load template
+    const templateFile = os === 'windows' ? 'launcher.ps1' : 'launcher.sh';
+    const templatePath = path.join(process.cwd(), 'scripts', 'templates', templateFile);
+
+    try {
+      const template = await Bun.file(templatePath).text();
+
+      // Get configuration from environment or use defaults
+      const config = {
+        SESSION_TOKEN: token,
+        REMOTE_SSH_HOST: process.env.REMOTE_SSH_HOST || 'anyrouter.top',
+        REMOTE_SSH_PORT: process.env.REMOTE_SSH_PORT || '2222',
+        REMOTE_SSH_USER: process.env.REMOTE_SSH_USER || 'tunnel',
+        SSH_PASSWORD: process.env.SSH_TUNNEL_PASSWORD || '',
+        API_ENDPOINT: process.env.API_ENDPOINT || 'https://anyrouter.top:3001/api/tunnel-ready',
+        ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || 'https://anyrouter.top',
+      };
+
+      // Replace placeholders
+      let script = template;
+      for (const [key, value] of Object.entries(config)) {
+        script = script.replace(new RegExp(`{{${key}}}`, 'g'), value);
+      }
+
+      // Determine filename and content type
+      const filename = os === 'windows' ? 'anyrouter-launcher.ps1' : 'anyrouter-launcher.sh';
+      const contentType = os === 'windows' ? 'text/plain' : 'application/x-sh';
+
+      return new Response(script, {
+        headers: {
+          'Content-Type': contentType,
+          'Content-Disposition': `attachment; filename="${filename}"`,
+        },
+      });
+    } catch (error) {
+      return new Response(
+        JSON.stringify({
+          error: `Failed to generate script: ${error instanceof Error ? error.message : String(error)}`
+        }),
+        {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
   }
 }

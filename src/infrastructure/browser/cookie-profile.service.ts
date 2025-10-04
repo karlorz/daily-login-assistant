@@ -34,17 +34,30 @@ export class CookieProfileService {
     site: string,
     user: string,
     loginUrl: string,
-    cookies: Cookie[]
+    cookies: Cookie[],
+    storageState?: { cookies: Cookie[]; origins: any[] }
   ): Promise<{ success: boolean; profileId: string; error?: string }> {
-    const profileId = `${site}-${user}`;
+    // Clean site and user names to match profile-manager.js naming convention
+    const cleanSite = site
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '')
+      .replace(/[^a-zA-Z0-9]/g, '');
+
+    const cleanUser = user.replace(/[^a-zA-Z0-9]/g, '');
+
+    const profileId = `${cleanSite}-${cleanUser}`;
     const profilePath = path.join(this.profilesDir, profileId);
 
     try {
       // Create profile directory
       await fs.mkdir(profilePath, { recursive: true });
 
-      // Save cookies to Chrome profile format
-      await this.saveCookiesToProfile(profilePath, cookies);
+      // Save cookies to Chrome profile format (with full storage state if provided)
+      if (storageState) {
+        await this.saveStorageStateToProfile(profilePath, storageState);
+      } else {
+        await this.saveCookiesToProfile(profilePath, cookies);
+      }
 
       // Save metadata
       const metadata: ProfileMetadata = {
@@ -174,14 +187,58 @@ export class CookieProfileService {
    * Save cookies to Chrome profile storage state format
    */
   private async saveCookiesToProfile(profilePath: string, cookies: Cookie[]): Promise<void> {
+    // Sanitize cookies to ensure Playwright compatibility
+    // Chrome DevTools Protocol returns partitionKey as object, but Playwright expects string or undefined
+    const sanitizedCookies = cookies.map(cookie => {
+      const sanitized = { ...cookie };
+
+      // Convert partitionKey from CDP format (object) to Playwright format (string or undefined)
+      if (sanitized.partitionKey && typeof sanitized.partitionKey === 'object') {
+        // Remove the partitionKey if it's an object - Playwright will handle partitioned cookies automatically
+        delete (sanitized as any).partitionKey;
+      }
+
+      return sanitized;
+    });
+
     const storageState = {
-      cookies,
+      cookies: sanitizedCookies,
       origins: []
     };
 
     await fs.writeFile(
       path.join(profilePath, 'storage-state.json'),
       JSON.stringify(storageState, null, 2)
+    );
+  }
+
+  /**
+   * Save full storage state (cookies + localStorage) to profile
+   */
+  private async saveStorageStateToProfile(
+    profilePath: string,
+    storageState: { cookies: Cookie[]; origins: any[] }
+  ): Promise<void> {
+    // Sanitize cookies to ensure Playwright compatibility
+    const sanitizedCookies = storageState.cookies.map(cookie => {
+      const sanitized = { ...cookie };
+
+      // Convert partitionKey from CDP format (object) to Playwright format (string or undefined)
+      if (sanitized.partitionKey && typeof sanitized.partitionKey === 'object') {
+        delete (sanitized as any).partitionKey;
+      }
+
+      return sanitized;
+    });
+
+    const sanitizedState = {
+      cookies: sanitizedCookies,
+      origins: storageState.origins || []
+    };
+
+    await fs.writeFile(
+      path.join(profilePath, 'storage-state.json'),
+      JSON.stringify(sanitizedState, null, 2)
     );
   }
 

@@ -24,8 +24,10 @@ Streamlined automated daily login assistant bot for small-scale operations (< 10
 ## Key Features
 - ✅ **Multi-Profile System**: Unified site + user management (`bun run profiles`)
 - ✅ **User-Guided Login**: Manual login once, automated forever (PRIMARY METHOD)
-- ✅ **OAuth Support**: GitHub, Discord, any authentication method
+- ✅ **PWA Remote Server**: Extract cookies + localStorage via SSH tunnel for remote deployment
+- ✅ **OAuth Support**: GitHub, Discord, LinuxDO, any authentication method (via PWA)
 - ✅ **Session Persistence**: Chrome profiles with weeks/months session lifetime
+- ✅ **localStorage Extraction**: Captures OAuth user data for remote sessions
 - ✅ **Batch Operations**: Daily check-ins for unlimited profiles
 - ✅ **Smart Notifications**: Real-time alerts via shoutrrr (Discord, Slack, email, etc.)
 - ✅ **Browser Automation**: Stealth Playwright with anti-detection
@@ -77,9 +79,18 @@ bun run test               # Run tests
 bun run test:coverage      # Coverage report
 
 # Multi-Profile System
-bun run profiles setup site user url  # Setup new profile
+bun run profiles setup site user url  # Setup new profile (CLI-guided method)
 bun run profiles list                  # List all profiles
 bun run profiles checkin-all          # Daily check-ins for all
+
+# PWA Remote Server Method (Production)
+# IMPORTANT: Run these commands in Docker to match production environment
+docker compose up -d                                    # Start services
+# Visit http://localhost:8001 to create profiles via PWA UI
+docker exec daily-login-assistant bun run profiles list              # List profiles
+docker exec daily-login-assistant bun run profiles checkin site user url  # Test check-in
+docker exec daily-login-assistant bun run profiles checkin-all       # Test batch check-ins
+
 # Docker linting
 docker run --rm -i hadolint/hadolint < Dockerfile          # Dockerfile best practices
 docker run -t --rm -v ${PWD}:/app zavoloklom/dclint .      # Docker Compose linting
@@ -295,6 +306,9 @@ docker run -d \
 - [x] **Final Solution Documentation**
 - [x] **Migrated to Bun for improved performance**
 - [x] **CI Pipeline with oxlint (replaced ESLint)**
+- [x] **PWA Remote Server Method**: SSH tunnel + CDP for cookie + localStorage extraction
+- [x] **OAuth Support**: Tested with GitHub, LinuxDO, Discord OAuth flows
+- [x] **Session Persistence**: localStorage extraction for long-lived OAuth sessions
 - [ ] Phase 1: Core Infrastructure Implementation
 - [ ] Phase 2: Browser Automation & Configuration
 - [ ] Phase 3: Notifications & Error Handling

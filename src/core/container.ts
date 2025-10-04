@@ -6,7 +6,6 @@ import { YamlConfigService } from "../infrastructure/config/yaml-config.service"
 import { SimpleMonitoringService } from "../infrastructure/monitoring/simple-monitoring.service";
 import { ShoutrrNotificationService } from "../infrastructure/notifications/shoutrrr-notification.service";
 import { InMemoryTaskQueue } from "../infrastructure/queue/in-memory-task-queue.service";
-import { DevWebhookListener } from "../infrastructure/dev/webhook-listener.service";
 import { PlaywrightBrowserService } from "../infrastructure/browser/playwright-browser.service";
 import { LoginEngine } from "../infrastructure/browser/login-engine.service";
 import { CircuitBreaker } from "../infrastructure/reliability/circuit-breaker.service";

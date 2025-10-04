@@ -1,0 +1,12 @@
+# Custom SSH configuration for remote port forwarding
+# Allows clients to specify which interface to bind on
+
+# Allow remote port forwarding
+GatewayPorts clientspecified
+
+# Allow TCP forwarding
+AllowTcpForwarding yes
+
+# Keep connections alive
+ClientAliveInterval 60
+ClientAliveCountMax 3
