@@ -1,6 +1,6 @@
 import { chromium, Browser, BrowserContext, Page, Locator } from 'playwright';
-import type { IBrowserService } from '../../core/interfaces/browser.service.interface';
-import { WebsiteConfig, AccountCredentials, BrowserSession } from '../../core/entities';
+import type { IBrowserService } from '../../core/interfaces/browser.service.interface.js';
+import { WebsiteConfig, AccountCredentials, BrowserSession } from '../../core/entities/index.js';
 import path from 'path';
 import fs from 'fs';
 

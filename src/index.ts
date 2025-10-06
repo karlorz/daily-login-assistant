@@ -1,9 +1,9 @@
-import { ServiceFactory } from './core/factory';
-import type { IConfigService, INotificationService, ILoginService } from './core/interfaces';
-import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
-import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
-import type { CookieWebApiService } from './infrastructure/web/cookie-web-api.service';
-import { LoginTask, TaskPriority } from './core/entities/login-task.entity';
+import { ServiceFactory } from './core/factory.js';
+import type { IConfigService, INotificationService, ILoginService } from './core/interfaces/index.js';
+import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service.js';
+import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service.js';
+import type { CookieWebApiService } from './infrastructure/web/cookie-web-api.service.js';
+import { LoginTask, TaskPriority } from './core/entities/login-task.entity.js';
 import path from 'path';
 
 async function main() {

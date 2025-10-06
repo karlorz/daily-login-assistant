@@ -1,5 +1,5 @@
 import { Page } from "playwright";
-import { AccountCredentials, WebsiteConfig, BrowserSession } from "../entities";
+import { AccountCredentials, WebsiteConfig, BrowserSession } from "../entities/index.js";
 
 export interface IBrowserService {
   createSession(

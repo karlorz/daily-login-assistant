@@ -1,4 +1,4 @@
-import { LoginTask } from "../entities";
+import { LoginTask } from "../entities/index.js";
 
 export interface ILoginService {
   processLoginTask(task: LoginTask): Promise<boolean>;

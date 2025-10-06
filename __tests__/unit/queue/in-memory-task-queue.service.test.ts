@@ -1,5 +1,5 @@
-import { InMemoryTaskQueue } from '../../../src/infrastructure/queue/in-memory-task-queue.service';
-import { LoginTask, TaskPriority, TaskStatus } from '../../../src/core/entities';
+import { InMemoryTaskQueue } from '../../../src/infrastructure/queue/in-memory-task-queue.service.js';
+import { LoginTask, TaskPriority, TaskStatus } from '../../../src/core/entities/index.js';
 
 describe('InMemoryTaskQueue', () => {
   let queue: InMemoryTaskQueue;

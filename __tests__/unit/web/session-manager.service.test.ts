@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from '@jest/globals';
-import { SessionManagerService } from '../../../src/infrastructure/web/session-manager.service';
+import { SessionManagerService } from '../../../src/infrastructure/web/session-manager.service.js';
 
 describe('SessionManagerService', () => {
   let service: SessionManagerService;

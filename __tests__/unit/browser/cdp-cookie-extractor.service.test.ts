@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { CDPCookieExtractorService } from '../../../src/infrastructure/browser/cdp-cookie-extractor.service';
+import { CDPCookieExtractorService } from '../../../src/infrastructure/browser/cdp-cookie-extractor.service.js';
 
 // Mock WebSocket
 class MockWebSocket {

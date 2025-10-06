@@ -1,11 +1,12 @@
-import { LoginEngine } from '../../../src/infrastructure/browser/login-engine.service';
-import { IBrowserService } from '../../../src/core/interfaces/browser.service.interface';
-import { IConfigService } from '../../../src/core/interfaces/config.service.interface';
-import { INotificationService } from '../../../src/core/interfaces/notification.service.interface';
-import { CircuitBreaker } from '../../../src/infrastructure/reliability/circuit-breaker.service';
-import { LoginTask, TaskPriority } from '../../../src/core/entities/login-task.entity';
-import { WebsiteConfig, WebsiteSelectors, AutomationConfig, SecurityConfig } from '../../../src/core/entities/website-config.entity';
-import { BrowserSession } from '../../../src/core/entities/browser-session.entity';
+import { jest } from '@jest/globals';
+import { LoginEngine } from '../../../src/infrastructure/browser/login-engine.service.js';
+import { IBrowserService } from '../../../src/core/interfaces/browser.service.interface.js';
+import { IConfigService } from '../../../src/core/interfaces/config.service.interface.js';
+import { INotificationService } from '../../../src/core/interfaces/notification.service.interface.js';
+import { CircuitBreaker } from '../../../src/infrastructure/reliability/circuit-breaker.service.js';
+import { LoginTask, TaskPriority } from '../../../src/core/entities/login-task.entity.js';
+import { WebsiteConfig, WebsiteSelectors, AutomationConfig, SecurityConfig } from '../../../src/core/entities/website-config.entity.js';
+import { BrowserSession } from '../../../src/core/entities/browser-session.entity.js';
 
 describe('LoginEngine', () => {
   let loginEngine: LoginEngine;

@@ -1,6 +1,6 @@
-import { PlaywrightBrowserService } from '../../src/infrastructure/browser/playwright-browser.service';
-import { WebsiteConfig, WebsiteSelectors, AutomationConfig, SecurityConfig } from '../../src/core/entities/website-config.entity';
-import { AccountCredentials } from '../../src/core/entities/account-credentials.entity';
+import { PlaywrightBrowserService } from '../../src/infrastructure/browser/playwright-browser.service.js';
+import { WebsiteConfig, WebsiteSelectors, AutomationConfig, SecurityConfig } from '../../src/core/entities/website-config.entity.js';
+import { AccountCredentials } from '../../src/core/entities/account-credentials.entity.js';
 import express from 'express';
 import { Server } from 'http';
 

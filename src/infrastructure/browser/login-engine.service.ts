@@ -1,9 +1,9 @@
-import type { ILoginService } from '../../core/interfaces/login.service.interface';
-import type { IBrowserService } from '../../core/interfaces/browser.service.interface';
-import type { IConfigService } from '../../core/interfaces/config.service.interface';
-import type { INotificationService } from '../../core/interfaces/notification.service.interface';
-import { LoginTask } from '../../core/entities/login-task.entity';
-import { AccountCredentials } from '../../core/entities/account-credentials.entity';
+import type { ILoginService } from '../../core/interfaces/login.service.interface.js';
+import type { IBrowserService } from '../../core/interfaces/browser.service.interface.js';
+import type { IConfigService } from '../../core/interfaces/config.service.interface.js';
+import type { INotificationService } from '../../core/interfaces/notification.service.interface.js';
+import { LoginTask } from '../../core/entities/login-task.entity.js';
+import { AccountCredentials } from '../../core/entities/account-credentials.entity.js';
 
 export class LoginEngine implements ILoginService {
   private metrics = {

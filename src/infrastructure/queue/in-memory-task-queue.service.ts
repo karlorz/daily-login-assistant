@@ -1,4 +1,4 @@
-import { LoginTask, TaskStatus } from '../../core/entities';
+import { LoginTask, TaskStatus } from '../../core/entities/index.js';
 
 export class InMemoryTaskQueue {
   private pendingTasks: LoginTask[] = [];

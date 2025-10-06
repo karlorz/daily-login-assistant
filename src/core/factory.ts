@@ -3,14 +3,14 @@
  * Manually wires all dependencies without heavyweight DI container
  */
 
-import { YamlConfigService } from '../infrastructure/config/yaml-config.service';
-import { ShoutrrNotificationService } from '../infrastructure/notifications/shoutrrr-notification.service';
-import { InMemoryTaskQueue } from '../infrastructure/queue/in-memory-task-queue.service';
-import { PlaywrightBrowserService } from '../infrastructure/browser/playwright-browser.service';
-import { LoginEngine } from '../infrastructure/browser/login-engine.service';
-import { CookieWebApiService } from '../infrastructure/web/cookie-web-api.service';
+import { YamlConfigService } from '../infrastructure/config/yaml-config.service.js';
+import { ShoutrrNotificationService } from '../infrastructure/notifications/shoutrrr-notification.service.js';
+import { InMemoryTaskQueue } from '../infrastructure/queue/in-memory-task-queue.service.js';
+import { PlaywrightBrowserService } from '../infrastructure/browser/playwright-browser.service.js';
+import { LoginEngine } from '../infrastructure/browser/login-engine.service.js';
+import { CookieWebApiService } from '../infrastructure/web/cookie-web-api.service.js';
 
-import type { IConfigService, INotificationService, IBrowserService, ILoginService } from './interfaces';
+import type { IConfigService, INotificationService, IBrowserService, ILoginService } from './interfaces/index.js';
 
 export class ServiceFactory {
   private static configService: IConfigService;

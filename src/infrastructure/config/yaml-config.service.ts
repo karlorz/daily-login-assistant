@@ -1,11 +1,11 @@
-import { IConfigService } from "../../core/interfaces";
+import { IConfigService } from "../../core/interfaces/index.js";
 import {
   WebsiteConfig,
   WebsiteSelectors,
   AutomationConfig,
   SecurityConfig,
   ScheduleConfig,
-} from "../../core/entities";
+} from "../../core/entities/index.js";
 import yaml from "js-yaml";
 import fs from "fs";
 import { promises as fsPromises } from "fs";
