@@ -38,15 +38,16 @@ describe('Browser Automation Implementation', () => {
     expect(content).toContain('performLogin');
   });
 
-  test('should have updated container with browser services', () => {
-    const filePath = path.join(srcPath, 'core/container.ts');
+  test('should have factory for dependency injection', () => {
+    const filePath = path.join(srcPath, 'core/factory.ts');
     expect(fs.existsSync(filePath)).toBe(true);
 
     const content = fs.readFileSync(filePath, 'utf8');
+    expect(content).toContain('ServiceFactory');
     expect(content).toContain('PlaywrightBrowserService');
     expect(content).toContain('LoginEngine');
-    expect(content).toContain('BrowserService');
-    expect(content).toContain('LoginService');
+    expect(content).toContain('getBrowserService');
+    expect(content).toContain('getLoginService');
   });
 
   test('should have updated entity models with required properties', () => {
@@ -69,7 +70,8 @@ describe('Browser Automation Implementation', () => {
 
     expect(packageJson.dependencies).toHaveProperty('playwright');
     expect(packageJson.dependencies).toHaveProperty('@playwright/test');
-    expect(packageJson.dependencies).toHaveProperty('inversify');
+    // Inversify removed in Oct 2025 simplification - now using simple factory pattern
+    expect(packageJson.dependencies).not.toHaveProperty('inversify');
   });
 });
 
@@ -101,11 +103,11 @@ describe('Type System Integration', () => {
     const tsconfigPath = path.join(__dirname, '../tsconfig.json');
     expect(fs.existsSync(tsconfigPath)).toBe(true);
 
-    // Check that critical types are exported
-    const typesPath = path.join(__dirname, '../src/core/types.ts');
-    const content = fs.readFileSync(typesPath, 'utf8');
-    expect(content).toContain('BrowserService');
-    expect(content).toContain('LoginService');
+    // Check that factory exports services properly
+    const factoryPath = path.join(__dirname, '../src/core/factory.ts');
+    const content = fs.readFileSync(factoryPath, 'utf8');
+    expect(content).toContain('getBrowserService');
+    expect(content).toContain('getLoginService');
   });
 });
 
@@ -129,15 +131,19 @@ describe('Implementation Quality', () => {
     expect(content).toContain('canRetry');
   });
 
-  test('should have proper dependency injection decorators', () => {
+  test('should have proper manual dependency injection', () => {
     const browserServicePath = path.join(__dirname, '../src/infrastructure/browser/playwright-browser.service.ts');
     const loginEnginePath = path.join(__dirname, '../src/infrastructure/browser/login-engine.service.ts');
 
     const browserContent = fs.readFileSync(browserServicePath, 'utf8');
     const loginContent = fs.readFileSync(loginEnginePath, 'utf8');
 
-    expect(browserContent).toContain('@injectable()');
-    expect(loginContent).toContain('@injectable()');
-    expect(loginContent).toContain('@inject(');
+    // Check that services are exported classes (no decorators - manual DI via factory)
+    expect(browserContent).toContain('export class PlaywrightBrowserService');
+    expect(loginContent).toContain('export class LoginEngine');
+
+    // Should NOT have Inversify decorators (removed in Oct 2025 simplification)
+    expect(browserContent).not.toContain('@injectable()');
+    expect(loginContent).not.toContain('@inject(');
   });
 });

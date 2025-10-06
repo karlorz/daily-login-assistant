@@ -1,4 +1,3 @@
-import { injectable } from 'inversify';
 import { chromium, Browser, Page } from 'playwright';
 import path from 'path';
 import fs from 'fs';
@@ -11,7 +10,6 @@ export interface UserGuidedLoginResult {
   message: string;
 }
 
-@injectable()
 export class UserGuidedLoginService {
   private browser: Browser | null = null;
 

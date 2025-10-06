@@ -34,11 +34,11 @@ services:
       # Bind mount for profile persistence (recommended for easy access)
       - ./profiles:/app/profiles
       - ./logs:/app/logs
-      - ./screenshots:/app/screenshots
+      - ./logs/screenshots:/app/logs/screenshots
       # Alternative: Use named volumes for production
       # - profiles_data:/app/profiles
       # - logs_data:/app/logs
-      # - screenshots_data:/app/screenshots
+      # - screenshots_data:/app/logs/screenshots
     environment:
       NODE_ENV: production
       WORKER_ID: ${HOSTNAME:-worker-1}

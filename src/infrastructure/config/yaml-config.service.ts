@@ -1,4 +1,3 @@
-import { injectable } from "inversify";
 import { IConfigService } from "../../core/interfaces";
 import {
   WebsiteConfig,
@@ -54,7 +53,6 @@ interface WebsiteConfigData {
   };
 }
 
-@injectable()
 export class YamlConfigService implements IConfigService {
   private config: ConfigData = {};
   private watchers: (() => void)[] = [];

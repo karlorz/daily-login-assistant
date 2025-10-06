@@ -39,7 +39,7 @@ RUN bun install
 
 # Copy source code and create directories, then build
 COPY --chown=pwuser:pwuser . .
-RUN mkdir -p profiles logs screenshots && bun run build
+RUN mkdir -p profiles logs/screenshots && bun run build
 
 # Expose port for health checks
 EXPOSE 3001

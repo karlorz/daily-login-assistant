@@ -196,7 +196,7 @@ docker exec daily-login-assistant curl http://ssh-tunnel:9222/json
 
 ### Development
 - ✅ localhost only (no external access)
-- ✅ Test password (`test123_local_only`)
+- ✅ Test password (`dev`)
 - ✅ HTTP (no SSL needed)
 
 ### Production
@@ -214,7 +214,7 @@ docker exec daily-login-assistant curl http://ssh-tunnel:9222/json
 | **UI URL** | `http://localhost:8001` | `https://your-server.com:8001` |
 | **SSH Host** | `localhost:2222` | `your-server.com:2222` |
 | **Env File** | `.env.development` (via `--env-file`) | `.env` (default) |
-| **Password** | `test123_local_only` | Strong (32+ chars) |
+| **Password** | `dev` | Strong (32+ chars) |
 | **SSL** | Not needed | Required (via nginx) |
 
 ---

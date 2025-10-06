@@ -51,6 +51,6 @@ settings:
   storage:
     profilesDir: "./profiles/user-guided"
     logsDir: "./logs"
-    screenshotsDir: "./screenshots"
+    screenshotsDir: "./logs/screenshots"
     maxLogSizeMB: 100
     maxScreenshotAgeDays: 7  # Auto-cleanup old screenshots

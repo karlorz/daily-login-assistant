@@ -5,7 +5,6 @@
  * No VNC/Xvfb required - minimal resource usage
  */
 
-import { injectable } from 'inversify';
 import type { Server } from 'bun';
 import { CookieProfileService } from '../browser/cookie-profile.service.js';
 import { CDPCookieExtractorService } from '../browser/cdp-cookie-extractor.service.js';
@@ -13,7 +12,6 @@ import { SessionManagerService } from './session-manager.service.js';
 import type { Cookie } from 'playwright';
 import path from 'path';
 
-@injectable()
 export class CookieWebApiService {
   private server: Server | null = null;
   private cookieService: CookieProfileService;

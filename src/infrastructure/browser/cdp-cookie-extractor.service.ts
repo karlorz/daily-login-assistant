@@ -3,7 +3,6 @@
  * Extracts cookies and localStorage from Chrome DevTools Protocol debug port
  */
 
-import { injectable } from 'inversify';
 import type { Cookie } from 'playwright';
 
 interface CDPTab {
@@ -30,7 +29,6 @@ interface StorageState {
   }>;
 }
 
-@injectable()
 export class CDPCookieExtractorService {
   /**
    * Extract cookies and localStorage from Chrome with remote debugging enabled

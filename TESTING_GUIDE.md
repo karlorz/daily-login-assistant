@@ -1,209 +1,215 @@
-# ✅ Cookie Upload System - Ready to Test!
+# Testing Guide
 
-## 🎉 Server Status: RUNNING
+## Overview
 
-```
-🌐 Cookie Upload Web API: http://localhost:3001/
-📊 Health Check: http://localhost:3001/health
-✅ Status: Online and ready
-```
+This guide covers testing procedures for the Daily Login Assistant system.
 
----
+## Installation Testing
 
-## 🧪 Testing Checklist for AnyRouter.top
+For testing the production installation script (`dailycheckin.sh`):
 
-### Step 1: Access Web UI ✅
+**See:** [docker/TEST_README.md](docker/TEST_README.md)
+
+Quick test:
 ```bash
-# Open in your browser:
-http://localhost:3001/
-
-# You should see:
-# - Cookie export instructions
-# - Upload form
-# - Profile list (empty initially)
+cd /path/to/daily-login-assistant
+./docker/test-dailycheckin.sh
 ```
 
-### Step 2: Install Browser Extension
-- **Chrome**: [EditThisCookie](https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg)
-- **Firefox**: [Cookie-Editor](https://addons.mozilla.org/firefox/addon/cookie-editor/)
+This simulates a fresh Ubuntu LXC production environment and validates:
+- Installation script functionality
+- Systemd service configuration
+- Application startup
+- Port accessibility
 
-### Step 3: Export Cookies from AnyRouter.top
-1. Open https://anyrouter.top/ in your browser
-2. Login with your credentials
-3. Click EditThisCookie extension → Export
-4. Copy the JSON
+## Development Testing
 
-### Step 4: Upload Cookies
-1. Go to http://localhost:3001/
-2. Fill in the form:
-   - **Site**: `anyrouter`
-   - **User**: `user1`
-   - **Login URL**: `https://anyrouter.top/`
-   - **Cookies**: [paste JSON from step 3]
-3. Click "Upload & Create Profile"
-4. Wait for success message
-
-### Step 5: Test Profile
-1. Find "anyrouter-user1" in the profile list
-2. Click "Test" button
-3. Should see: ✅ Check-in successful!
-
----
-
-## 📁 Production Config Files Created
-
-### For Docker Deployment
-
-**Config Files**:
-```
-config/websites.production.yaml  ✅ AnyRouter.top config
-config/settings.production.yaml  ✅ Headless server settings
-config/anyrouter.example.yaml    ✅ Multiple users example
-```
-
-**Example Deployment**:
+### Unit Tests
 ```bash
-# Copy production config
-cp config/websites.production.yaml config/websites.yaml
-cp config/settings.production.yaml config/settings.yaml
+bun run test
+```
 
-# Build Docker
-docker-compose build
+### Integration Tests  
+```bash
+bun run test:headless      # Headless browser tests
+bun run test:headed        # Headed browser tests (see browser)
+```
 
-# Deploy
+### Coverage
+```bash
+bun run test:coverage
+```
+
+### All Tests
+```bash
+bun run test:all
+```
+
+## Local Development Testing
+
+### 1. Start Development Server
+```bash
+bun run dev
+```
+
+### 2. Test PWA Interface
+Open http://localhost:8001 in your browser
+
+### 3. Profile Management
+```bash
+# List profiles
+bun run profiles list
+
+# Setup new profile (interactive)
+bun run profiles setup <site> <user> <url>
+
+# Test check-in
+bun run profiles checkin <site> <user> <url>
+
+# Test all profiles
+bun run profiles checkin-all
+```
+
+## Docker Testing
+
+### Development Docker
+```bash
+# Build and start
 docker-compose up -d
 
-# Access web UI from server
-http://your-server-ip:3001/
-```
-
----
-
-## 📋 Config Comparison
-
-| File | Purpose | Status |
-|------|---------|--------|
-| `websites.yaml` | Development (test sites) | Keep for testing |
-| `websites.production.yaml` | Production (anyrouter) | ✅ Ready for Docker |
-| `websites.example.yaml` | Reference/examples | Archive |
-| `sites-reference.yaml` | Old format | Can delete |
-| `settings.yaml` | Development settings | Keep |
-| `settings.production.yaml` | Production settings | ✅ Ready for Docker |
-| `anyrouter.example.yaml` | Multi-user example | Reference |
-
----
-
-## 🚀 Quick Deploy to Docker
-
-```bash
-# 1. Prepare configs
-cp config/websites.production.yaml config/websites.yaml
-cp config/settings.production.yaml config/settings.yaml
-
-# 2. Create environment file
-cat > .env.production << 'EOF'
-NOTIFICATION_URLS=discord://your-token@channel-id
-TZ=Asia/Hong_Kong
-NODE_ENV=production
-EOF
-
-# 3. Build and start
-docker-compose build
-docker-compose up -d
-
-# 4. Upload anyrouter.top cookies via web UI
-# http://your-server-ip:3001/
-
-# 5. Verify automation
+# View logs
 docker-compose logs -f
-```
 
----
-
-## 🎯 Next Steps
-
-**Immediate** (< 5 minutes):
-1. ✅ Server running at http://localhost:3001
-2. 🔲 Install EditThisCookie extension
-3. 🔲 Login to anyrouter.top
-4. 🔲 Export cookies
-5. 🔲 Upload via web UI
-6. 🔲 Test profile
-
-**After Testing** (when ready for production):
-1. 🔲 Copy production configs
-2. 🔲 Deploy to Docker
-3. 🔲 Create profiles for all users
-4. 🔲 Verify scheduled automation
-5. 🔲 Set up notifications
-
----
-
-## 📊 Resource Usage
-
-**Current (Development)**:
-- RAM: ~150MB (with UI)
-- CPU: < 1%
-- Ports: 3001
-
-**Docker (Production)**:
-- RAM: ~100MB (headless)
-- CPU: < 1%
-- Ports: 3001
-- Disk: ~50MB + profile data
-
----
-
-## 🆘 Troubleshooting
-
-### Cannot access http://localhost:3001
-
-**Check server status**:
-```bash
-# See if server is running
-lsof -i:3001
-
-# Check logs
-tail -f logs/app-*.log
-```
-
-**Restart server**:
-```bash
 # Stop
-killall -9 bun
-
-# Start
-bun dist/index.js
+docker-compose down
 ```
 
-### Cookie upload fails
+### Production Docker Testing
+See [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) for complete Docker deployment testing procedures.
 
-**Common issues**:
-1. **Invalid JSON**: Make sure you copied the entire JSON array from extension
-2. **Expired cookies**: Login again and re-export
-3. **Missing cookies**: Export ALL cookies from anyrouter.top domain
+## Session Recovery Testing
 
-### Test check-in fails
+See [docs/SESSION_RECOVERY.md](docs/SESSION_RECOVERY.md) for testing session recovery procedures.
 
-**Solutions**:
-1. Verify anyrouter.top is accessible
-2. Re-upload fresh cookies
-3. Check screenshot in `screenshots/` folder
-4. Review logs for error details
+## Notification Testing
 
----
+See [docs/NOTIFICATION_SYSTEM.md](docs/NOTIFICATION_SYSTEM.md) for testing notification functionality.
 
-## ✅ System Ready
+## Continuous Integration
 
-Everything is set up and ready to test! The web UI is running at:
+### Pre-commit Checks
+```bash
+bun run local-ci   # Runs lint, typecheck, and tests
+```
 
-**http://localhost:3001/**
+### GitHub Actions
+The CI pipeline runs automatically on push:
+- Linting (oxlint)
+- Type checking (tsc)
+- Unit tests
+- Integration tests
+- Build verification
 
-Open it now and follow Step 2-5 above to test with anyrouter.top! 🚀
+## Browser Automation Testing
 
----
+### Test User-Guided Login
+```bash
+bun run guided-login
+```
 
-**Last Updated**: 2025-10-04
-**Server Status**: ✅ Online
-**Port**: 3001
-**Method**: Cookie Upload (Lightweight)
+### Test Saved Sessions
+```bash
+bun run test-session
+```
+
+### Cleanup Test Profiles
+```bash
+bun run cleanup-profiles
+```
+
+## Troubleshooting Tests
+
+### Clear Test Data
+```bash
+rm -rf profiles/test-*
+rm -rf logs/screenshots/test-*
+```
+
+### Reset Test Environment
+```bash
+docker-compose down -v
+rm -rf profiles/ logs/
+mkdir -p profiles logs
+docker-compose up -d
+```
+
+### Check Test Container
+```bash
+# Access test container
+docker exec -it ubuntu-systemd-test /bin/bash
+
+# Check service status
+systemctl status daily-login-assistant
+
+# View logs
+journalctl -u daily-login-assistant -f
+```
+
+## Performance Testing
+
+### Monitor Resource Usage
+```bash
+# CPU and memory
+docker stats daily-login-assistant
+
+# Detailed stats
+docker exec daily-login-assistant ps aux
+```
+
+### Profile Execution Time
+Check logs for timing information:
+```bash
+grep "execution time" logs/app.log
+```
+
+## Security Testing
+
+### Check Permissions
+```bash
+ls -la profiles/
+ls -la logs/
+```
+
+### Verify Environment Variables
+```bash
+# Should not expose secrets
+docker exec daily-login-assistant env | grep -v PASSWORD
+```
+
+### Test Credential Isolation
+```bash
+# Each profile should have isolated storage
+bun run profiles list
+```
+
+## Related Documentation
+
+- [Installation Testing](docker/TEST_README.md) - Test production installation script
+- [Docker Deployment](DOCKER_DEPLOYMENT.md) - Docker deployment guide
+- [Deployment Checklist](DEPLOYMENT_CHECKLIST.md) - Production deployment checklist
+- [Profile System](PROFILE_SYSTEM.md) - Profile management guide
+- [Session Recovery](docs/SESSION_RECOVERY.md) - Session recovery procedures
+- [Notifications](docs/NOTIFICATION_SYSTEM.md) - Notification setup and testing
+
+## Quick Reference
+
+| Test Type | Command | Documentation |
+|-----------|---------|---------------|
+| Installation | `./docker/test-dailycheckin.sh` | [docker/TEST_README.md](docker/TEST_README.md) |
+| Unit Tests | `bun run test` | This guide |
+| Integration | `bun run test:headless` | This guide |
+| Coverage | `bun run test:coverage` | This guide |
+| Local Dev | `bun run dev` | [LOCAL_DEV_SETUP.md](LOCAL_DEV_SETUP.md) |
+| Docker | `docker-compose up -d` | [DOCKER_DEPLOYMENT.md](DOCKER_DEPLOYMENT.md) |
+| Pre-commit | `bun run local-ci` | This guide |
+| Profiles | `bun run profiles list` | [PROFILE_SYSTEM.md](PROFILE_SYSTEM.md) |

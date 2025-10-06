@@ -3,7 +3,6 @@
  * Handles session tokens for script launcher authentication
  */
 
-import { injectable } from 'inversify';
 
 export interface SessionData {
   token: string;
@@ -14,7 +13,6 @@ export interface SessionData {
   expiresAt: Date;
 }
 
-@injectable()
 export class SessionManagerService {
   private sessions: Map<string, SessionData> = new Map();
   private readonly SESSION_TIMEOUT_MS = 3600000; // 1 hour

@@ -1,11 +1,9 @@
-import { injectable } from 'inversify';
 import { chromium, Browser, BrowserContext, Page, Locator } from 'playwright';
 import type { IBrowserService } from '../../core/interfaces/browser.service.interface';
 import { WebsiteConfig, AccountCredentials, BrowserSession } from '../../core/entities';
 import path from 'path';
 import fs from 'fs';
 
-@injectable()
 export class PlaywrightBrowserService implements IBrowserService {
   private browser: Browser | null = null;
   private sessions: Map<string, BrowserSession> = new Map();

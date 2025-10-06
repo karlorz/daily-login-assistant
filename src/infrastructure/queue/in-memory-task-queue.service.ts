@@ -1,7 +1,5 @@
-import { injectable } from 'inversify';
 import { LoginTask, TaskStatus } from '../../core/entities';
 
-@injectable()
 export class InMemoryTaskQueue {
   private pendingTasks: LoginTask[] = [];
   private processingTasks: LoginTask[] = [];

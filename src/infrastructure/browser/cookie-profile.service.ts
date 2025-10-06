@@ -5,7 +5,6 @@
  * No VNC/Xvfb required - user exports cookies from local browser
  */
 
-import { injectable } from 'inversify';
 import { chromium, Browser, BrowserContext, Cookie } from 'playwright';
 import fs from 'fs/promises';
 import path from 'path';
@@ -19,7 +18,6 @@ interface ProfileMetadata {
   cookies: number;
 }
 
-@injectable()
 export class CookieProfileService {
   private profilesDir: string;
 

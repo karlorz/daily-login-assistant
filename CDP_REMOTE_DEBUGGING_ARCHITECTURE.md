@@ -76,7 +76,7 @@ services:
       - ./config:/app/config
       - ./profiles:/app/profiles
       - ./logs:/app/logs
-      - ./screenshots:/app/screenshots
+      - ./logs/screenshots:/app/logs/screenshots
     depends_on:
       - ssh-tunnel
     networks:

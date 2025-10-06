@@ -1,14 +1,10 @@
-import { injectable, inject } from 'inversify';
 import type { ILoginService } from '../../core/interfaces/login.service.interface';
 import type { IBrowserService } from '../../core/interfaces/browser.service.interface';
 import type { IConfigService } from '../../core/interfaces/config.service.interface';
 import type { INotificationService } from '../../core/interfaces/notification.service.interface';
 import { LoginTask } from '../../core/entities/login-task.entity';
 import { AccountCredentials } from '../../core/entities/account-credentials.entity';
-import { CircuitBreaker } from '../reliability/circuit-breaker.service';
-import { TYPES } from '../../core/types';
 
-@injectable()
 export class LoginEngine implements ILoginService {
   private metrics = {
     totalAttempts: 0,
@@ -20,10 +16,9 @@ export class LoginEngine implements ILoginService {
   };
 
   constructor(
-    @inject(TYPES.BrowserService) private browserService: IBrowserService,
-    @inject(TYPES.ConfigService) private configService: IConfigService,
-    @inject(TYPES.NotificationService) private notificationService: INotificationService,
-    @inject(TYPES.CircuitBreaker) private circuitBreaker: CircuitBreaker
+    private browserService: IBrowserService,
+    private configService: IConfigService,
+    private notificationService: INotificationService
   ) {}
 
   async processLoginTask(task: LoginTask): Promise<boolean> {
@@ -45,22 +40,6 @@ export class LoginEngine implements ILoginService {
         console.log(`Website ${task.websiteId} is disabled, skipping task`);
         task.markAsCompleted();
         return true;
-      }
-
-      // Check circuit breaker before attempting login
-      if (this.circuitBreaker.isCircuitOpen(task.websiteId)) {
-        const stats = this.circuitBreaker.getStats(task.websiteId);
-        const resetIn = stats.willResetAt ? Math.round((stats.willResetAt - Date.now()) / 1000) : 0;
-        console.warn(`⚠️  Circuit breaker is OPEN for ${task.websiteId} - skipping login (resets in ${resetIn}s)`);
-
-        await this.notificationService.sendNotification(
-          'Circuit Breaker - Login Skipped',
-          `Skipping login for ${websiteConfig.name} due to ${stats.failureCount} consecutive failures. Will retry in ${resetIn} seconds.`,
-          'warning'
-        );
-
-        task.markAsFailed('Circuit breaker open');
-        return false;
       }
 
       // Get credentials
@@ -113,9 +92,6 @@ export class LoginEngine implements ILoginService {
         task.markAsCompleted();
         this.metrics.successfulLogins++;
 
-        // Record success with circuit breaker
-        this.circuitBreaker.recordSuccess(task.websiteId);
-
         // Calculate and update average login time
         const loginTime = Date.now() - startTime;
         this.updateAverageLoginTime(loginTime);
@@ -135,19 +111,6 @@ export class LoginEngine implements ILoginService {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       task.markAsFailed(errorMessage);
       this.metrics.failedLogins++;
-
-      // Record failure with circuit breaker
-      this.circuitBreaker.recordFailure(task.websiteId);
-
-      // Check if circuit just opened
-      if (this.circuitBreaker.isCircuitOpen(task.websiteId)) {
-        const stats = this.circuitBreaker.getStats(task.websiteId);
-        await this.notificationService.sendNotification(
-          'Circuit Breaker Opened',
-          `Circuit breaker opened for ${task.websiteId} after ${stats.failureCount} consecutive failures. Login attempts will be paused for 5 minutes.`,
-          'error'
-        );
-      }
 
       // Take screenshot for debugging
       try {

@@ -139,7 +139,7 @@ docker-compose up -d
 volumes:
   - ./profiles:/app/profiles      # Session storage
   - ./logs:/app/logs              # Application logs
-  - ./screenshots:/app/screenshots # Debug screenshots
+  - ./logs/screenshots:/app/logs/screenshots # Debug screenshots
 ```
 
 **Advantages**:
@@ -156,10 +156,10 @@ daily-login-assistant/
 │       ├── github-user1/          # Chrome profile data
 │       ├── discord-user1/
 │       └── anyrouter-user1/
-├── logs/
-│   └── app-2025-10-04.log
-└── screenshots/
-    └── github-user1-2025-10-04.png
+└── logs/
+    ├── app-2025-10-04.log
+    └── screenshots/
+        └── github-user1-2025-10-04.png
 ```
 
 ### **Alternative: Named Volumes (Production)**
@@ -168,7 +168,7 @@ daily-login-assistant/
 volumes:
   - profiles_data:/app/profiles
   - logs_data:/app/logs
-  - screenshots_data:/app/screenshots
+  - screenshots_data:/app/logs/screenshots
 ```
 
 **To use named volumes** (uncomment in docker-compose.yml):
@@ -242,7 +242,6 @@ docker-compose up -d
 # .gitignore (already configured)
 /profiles/
 /logs/
-/screenshots/
 ```
 
 ### **Docker Image**

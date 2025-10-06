@@ -1,10 +1,8 @@
-import 'reflect-metadata';
-import { container } from './core/container';
-import { IConfigService, INotificationService, IMonitoringService, ILoginService } from './core/interfaces';
-import { TYPES } from './core/types';
+import { ServiceFactory } from './core/factory';
+import type { IConfigService, INotificationService, ILoginService } from './core/interfaces';
 import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
 import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
-import { CookieWebApiService } from './infrastructure/web/cookie-web-api.service';
+import type { CookieWebApiService } from './infrastructure/web/cookie-web-api.service';
 import { LoginTask, TaskPriority } from './core/entities/login-task.entity';
 import path from 'path';
 
@@ -12,16 +10,15 @@ async function main() {
   try {
     console.log('🚀 Starting Daily Login Assistant Bot...');
 
-    // Initialize services
-    const configService = container.get<IConfigService>(TYPES.ConfigService);
-    const notificationService = container.get<INotificationService>(TYPES.NotificationService);
-    const monitoringService = container.get<IMonitoringService>(TYPES.MonitoringService);
-    const loginService = container.get<ILoginService>(TYPES.LoginService);
-    const _taskQueue = container.get<InMemoryTaskQueue>(TYPES.TaskQueue);
+    // Initialize services using factory
+    const configService: IConfigService = ServiceFactory.getConfigService();
+    const notificationService: INotificationService = ServiceFactory.getNotificationService();
+    const loginService: ILoginService = ServiceFactory.getLoginService();
+    const _taskQueue: InMemoryTaskQueue = ServiceFactory.getTaskQueue();
 
     // Start Cookie Web API for profile management (takes port 3001)
     console.log('🌐 Starting Cookie Upload Web API...');
-    const cookieWebApi = container.get<CookieWebApiService>(TYPES.CookieWebApi);
+    const cookieWebApi: CookieWebApiService = ServiceFactory.getCookieWebApi();
     await cookieWebApi.start();
     console.log('');
 
@@ -29,7 +26,7 @@ async function main() {
     let webhookListener: DevWebhookListener | null = null;
     if (process.env.NODE_ENV === 'development' && process.env.ENABLE_WEBHOOK_LISTENER === 'true') {
       try {
-        webhookListener = container.get<DevWebhookListener>(TYPES.DevWebhookListener);
+        webhookListener = new DevWebhookListener();
         await webhookListener.start();
       } catch {
         console.log('💡 Webhook listener not available (optional for development)');
@@ -85,15 +82,12 @@ async function main() {
             const success = await loginService.processLoginTask(loginTask);
 
             if (success) {
-              monitoringService.recordLoginAttempt(config.id, 'default_account', 'success');
               console.log(`✅ Login task completed successfully for ${config.name}`);
             } else {
-              monitoringService.recordLoginAttempt(config.id, 'default_account', 'failed');
               console.log(`❌ Login task failed for ${config.name}`);
             }
           } catch (error) {
             console.error(`Error processing login task for ${config.name}:`, error);
-            monitoringService.recordLoginAttempt(config.id, 'default_account', 'failed');
           }
         }
       }
@@ -122,15 +116,18 @@ async function main() {
       await notificationService.sendShutdownNotification();
 
       // Get final stats
-      const stats = monitoringService.getStats();
       const loginStats = loginService.getMetrics();
-      console.log('Final statistics:', { ...stats, ...loginStats });
+      console.log('Final statistics:', loginStats);
 
-      if (stats.totalLogins > 0) {
+      const totalAttempts = Number(loginStats.totalAttempts) || 0;
+      const successfulLogins = Number(loginStats.successfulLogins) || 0;
+      const failedLogins = Number(loginStats.failedLogins) || 0;
+
+      if (totalAttempts > 0) {
         await notificationService.sendDailySummary(
-          stats.totalLogins,
-          stats.successfulLogins,
-          stats.failedLogins
+          totalAttempts,
+          successfulLogins,
+          failedLogins
         );
       }
 
@@ -156,7 +153,7 @@ async function main() {
     console.error('Failed to start application:', error);
 
     try {
-      const notificationService = container.get<INotificationService>(TYPES.NotificationService);
+      const notificationService = ServiceFactory.getNotificationService();
       await notificationService.sendErrorNotification('Startup', (error as Error).message);
     } catch (notificationError) {
       console.error('Failed to send startup error notification:', notificationError);

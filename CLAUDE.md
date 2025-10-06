@@ -298,6 +298,17 @@ docker run -d \
   -e SITE1_USERNAME="username" \
   -e SITE1_PASSWORD="password" \
   daily-login-assistant
+
+# Test native systemd installation script (for development)
+# IMPORTANT: Use FORCE_SYSTEMD=true to enable systemd service in containers
+# By default, the script detects containers and skips systemd service creation
+/Users/karlchow/Desktop/code/daily-login-assistant/docker/test-dailycheckin.sh
+
+# After container starts, run installation with FORCE_SYSTEMD flag:
+docker exec ubuntu-systemd-test bash -c "export FORCE_SYSTEMD=true && /tmp/dailycheckin.sh"
+
+# Then verify service is created:
+docker exec ubuntu-systemd-test systemctl status daily-login-assistant
 ```
 
 ## Implementation Status
@@ -309,6 +320,13 @@ docker run -d \
 - [x] **PWA Remote Server Method**: SSH tunnel + CDP for cookie + localStorage extraction
 - [x] **OAuth Support**: Tested with GitHub, LinuxDO, Discord OAuth flows
 - [x] **Session Persistence**: localStorage extraction for long-lived OAuth sessions
+- [x] **Code Simplification Complete** (Oct 2025):
+  - Removed Inversify DI container → Simple factory pattern
+  - Removed 6 unused interfaces (audit-logger, cache, health-check, queue, retry-strategy, task-processor)
+  - Removed CircuitBreaker service → Simple retry logic
+  - Removed MonitoringService → Direct console logging
+  - Removed inversify and reflect-metadata dependencies
+  - Reduced codebase by ~500 lines (~25% reduction)
 - [ ] Phase 1: Core Infrastructure Implementation
 - [ ] Phase 2: Browser Automation & Configuration
 - [ ] Phase 3: Notifications & Error Handling
@@ -317,8 +335,8 @@ docker run -d \
 ## Success Metrics
 - **Reliability**: >95% successful login rate
 - **Performance**: <60 seconds per login attempt
-- **Simplicity**: <500 lines of core application code
-- **Maintainability**: Clear separation of concerns
+- **Simplicity**: <500 lines of core application code ✅ (achieved through Oct 2025 simplification)
+- **Maintainability**: Clear separation of concerns ✅ (manual DI via factory pattern)
 - **Notifications**: Real-time alerts for failures and daily summaries
 
 ## Key Simplifications
@@ -327,7 +345,9 @@ docker run -d \
 3. **No Vault**: Environment variables for credentials
 4. **File-based Storage**: Local file system instead of databases
 5. **Single Process**: No need for multiple workers
-6. **Simplified Architecture**: Clean but minimal dependency injection
+6. **Simplified DI**: Manual dependency injection via factory pattern (removed Inversify)
+7. **Direct Logging**: Console.log instead of monitoring service abstraction
+8. **Simple Retry Logic**: Removed circuit breaker complexity
 
 ## Project Decisions
 

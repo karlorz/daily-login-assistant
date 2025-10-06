@@ -1,6 +1,4 @@
-import { injectable } from 'inversify';
 
-@injectable()
 export class DevWebhookListener {
   private server: any = null;
   private port: number;

@@ -35,7 +35,7 @@
   volumes:
     - ./profiles:/app/profiles
     - ./logs:/app/logs
-    - ./screenshots:/app/screenshots
+    - ./logs/screenshots:/app/logs/screenshots
   ```
 - [ ] Build Docker image
   ```bash
@@ -140,7 +140,7 @@
 - [ ] Verify session not expired: Test locally first
 - [ ] Check website URL hasn't changed
 - [ ] Verify website didn't change auth flow
-- [ ] Check screenshot for debugging: `ls -la screenshots/`
+- [ ] Check screenshot for debugging: `ls -la logs/screenshots/`
 - [ ] Review logs for error details
 
 ---
@@ -223,7 +223,7 @@ ls -1 profiles/user-guided/ | wc -l
 du -sh logs/
 
 # Screenshot count
-ls -1 screenshots/ | wc -l
+ls -1 logs/screenshots/ | wc -l
 ```
 
 ### Weekly Checks
