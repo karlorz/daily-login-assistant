@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  daily-login-assistant:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.systemd
+    container_name: daily-login-assistant-systemd
+    privileged: true
+    ports:
+      - "8001:8001"
+    volumes:
+      # Mount cgroup for systemd
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    environment:
+      - container=docker
+    restart: unless-stopped
+
+  # Manual testing container (doesn't run installation script)
+  ubuntu-test:
+    image: ubuntu:24.04
+    container_name: ubuntu-test-systemd
+    privileged: true
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount the installation script for manual testing
+      - ../docker/dailycheckin.sh:/tmp/dailycheckin.sh:ro
+      # Mount cgroup for systemd
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    environment:
+      - container=docker
+    command: >
+      bash -c "
+        # Install systemd for manual testing
+        export DEBIAN_FRONTEND=noninteractive
+        apt-get update -qq
+        apt-get install -y systemd systemd-sysv dbus iproute2 curl wget
+        rm -rf /var/lib/apt/lists/*
+        systemctl mask dev-hugepages.dev-hugepages.service dev-mqueue.dev-mqueue.service sys-kernel-config.mount sys-kernel-debug.mount sys-fs-fuse-connections.mount || true
+        chmod +x /tmp/dailycheckin.sh
+        echo 'Systemd initialized. Ready for manual testing.'
+        echo 'Run: /tmp/dailycheckin.sh'
+        tail -f /dev/null
+      "

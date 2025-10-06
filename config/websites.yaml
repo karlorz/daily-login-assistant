@@ -1,8 +1,95 @@
 websites:
+  # Fast and reliable demo sites for testing (in order of preference)
+
+  # Option 1: Practice Test Automation (Very Fast & Reliable)
+  - id: practice-login
+    name: "Practice Test Automation"
+    url: "https://practicetestautomation.com/practice-test-login/"
+    enabled: true
+    schedule:
+      time: "10:00"  # Change this to current time +1 minute to test
+      timezone: "America/New_York"
+    credentials:
+      username_env: "PRACTICE_USERNAME"  # student
+      password_env: "PRACTICE_PASSWORD"  # Password123
+    selectors:
+      username: ["#username"]
+      password: ["#password"]
+      loginButton: ["#submit"]
+      checkinButton: []  # No check-in on this site
+      logoutIndicator: [".post-title", "h1"]  # Success page indicator
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 80
+      navigationTimeout: 20000
+      retryAttempts: 3
+      retryDelay: 3000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Option 2: Expand Testing (Fast & Modern)
+  - id: expand-login
+    name: "Expand Testing Login"
+    url: "https://practice.expandtesting.com/login"
+    enabled: false  # Enable to test this one
+    schedule:
+      time: "10:01"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "EXPAND_USERNAME"  # practice
+      password_env: "EXPAND_PASSWORD"  # SuperSecretPassword!
+    selectors:
+      username: ["#username", "[name='username']"]
+      password: ["#password", "[name='password']"]
+      loginButton: ["[type='submit']", ".btn-primary"]
+      checkinButton: []
+      logoutIndicator: [".alert-success", ".success-message"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 80
+      navigationTimeout: 20000
+      retryAttempts: 3
+      retryDelay: 3000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Option 3: The Internet (Original - slower but works)
+  - id: demo-login
+    name: "Demo Login Site (Herokuapp)"
+    url: "https://the-internet.herokuapp.com/login"
+    enabled: false  # Disabled due to slow performance
+    schedule:
+      time: "10:02"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "DEMO_USERNAME"  # tomsmith
+      password_env: "DEMO_PASSWORD"  # SuperSecretPassword!
+    selectors:
+      username: ["#username", "[name='username']"]
+      password: ["#password", "[name='password']"]
+      loginButton: [".fa-sign-in", "[type='submit']"]
+      checkinButton: []
+      logoutIndicator: [".icon-signout", "a[href='/logout']"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 45000  # Longer timeout due to slow site
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Disabled examples (invalid URLs - kept for reference)
   - id: example1
     name: "Example Website 1"
     url: "https://example1.com/login"
-    enabled: true
+    enabled: false  # Disabled - invalid URL
     schedule:
       time: "23:07"
       timezone: "America/New_York"
@@ -29,7 +116,7 @@ websites:
   - id: example2
     name: "Example Website 2"
     url: "https://example2.com/signin"
-    enabled: false
+    enabled: false  # Disabled - invalid URL
     schedule:
       time: "10:30"
       timezone: "America/New_York"

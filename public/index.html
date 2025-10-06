@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Login Assistant - Profile Setup</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .method-btn {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .method-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .method-btn.active {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .method-content {
+            display: none;
+        }
+
+        .method-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"],
+        input[type="url"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .instructions {
+            background: #f8f9ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .instructions.active {
+            display: block;
+        }
+
+        .instructions h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.8;
+        }
+
+        .instructions code {
+            background: #e0e0e0;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 6px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .status.info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+            display: block;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Daily Login Assistant</h1>
+        <p class="subtitle">Create a new profile for automated check-ins</p>
+
+        <div class="method-selector">
+            <button class="method-btn active" data-method="script">
+                <strong>🚀 One-Click Script</strong><br>
+                <small>Download & run launcher script</small>
+            </button>
+            <button class="method-btn" data-method="manual">
+                <strong>📋 Manual Upload</strong><br>
+                <small>Export cookies from browser</small>
+            </button>
+        </div>
+
+        <!-- Script Launcher Method -->
+        <div id="script-method" class="method-content active">
+            <div class="form-group">
+                <label for="script-site">Site Name</label>
+                <input type="text" id="script-site" placeholder="e.g., github-oauth, anyrouter" required>
+            </div>
+
+            <div class="form-group">
+                <label for="script-user">Username</label>
+                <input type="text" id="script-user" placeholder="e.g., user1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="script-url">Login URL</label>
+                <input type="url" id="script-url" placeholder="https://example.com/login" required>
+            </div>
+
+            <button class="btn" id="download-script-btn">Download Launcher Script</button>
+
+            <div id="script-instructions" class="instructions">
+                <h3>Next Steps:</h3>
+                <ol id="script-steps"></ol>
+            </div>
+
+            <div id="script-status" class="status"></div>
+        </div>
+
+        <!-- Manual Upload Method -->
+        <div id="manual-method" class="method-content">
+            <div class="instructions active">
+                <h3>How to export cookies:</h3>
+                <ol>
+                    <li>Install the <a href="https://chrome.google.com/webstore/detail/editthiscookie/fngmhnnpilhplaeedifhccceomclgfbg" target="_blank">EditThisCookie</a> Chrome extension</li>
+                    <li>Navigate to the website and login</li>
+                    <li>Click the EditThisCookie icon</li>
+                    <li>Click "Export" (bottom right)</li>
+                    <li>Paste the JSON below</li>
+                </ol>
+            </div>
+
+            <div class="form-group">
+                <label for="manual-site">Site Name</label>
+                <input type="text" id="manual-site" placeholder="e.g., github-oauth" required>
+            </div>
+
+            <div class="form-group">
+                <label for="manual-user">Username</label>
+                <input type="text" id="manual-user" placeholder="e.g., user1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="manual-url">Login URL</label>
+                <input type="url" id="manual-url" placeholder="https://example.com/login" required>
+            </div>
+
+            <div class="form-group">
+                <label for="cookies-json">Cookies JSON</label>
+                <textarea id="cookies-json" rows="8" style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; font-family: monospace;" placeholder='[{"name":"session","value":"...","domain":".example.com"}]'></textarea>
+            </div>
+
+            <button class="btn" id="upload-cookies-btn">Create Profile</button>
+
+            <div id="manual-status" class="status"></div>
+        </div>
+    </div>
+
+    <script>
+        // Detect OS
+        function detectOS() {
+            const platform = navigator.platform.toLowerCase();
+            const userAgent = navigator.userAgent.toLowerCase();
+
+            if (platform.includes('win') || userAgent.includes('windows')) {
+                return 'windows';
+            } else if (platform.includes('mac') || userAgent.includes('mac')) {
+                return 'macos';
+            } else if (platform.includes('linux') || userAgent.includes('linux')) {
+                return 'linux';
+            }
+            return 'unknown';
+        }
+
+        // Method switching
+        document.querySelectorAll('.method-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const method = btn.dataset.method;
+
+                document.querySelectorAll('.method-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.method-content').forEach(c => c.classList.remove('active'));
+
+                btn.classList.add('active');
+                document.getElementById(`${method}-method`).classList.add('active');
+            });
+        });
+
+        // Script launcher
+        let sessionToken = null;
+
+        document.getElementById('download-script-btn').addEventListener('click', async () => {
+            const site = document.getElementById('script-site').value.trim();
+            const user = document.getElementById('script-user').value.trim();
+            const loginUrl = document.getElementById('script-url').value.trim();
+
+            if (!site || !user || !loginUrl) {
+                showStatus('script', 'error', 'Please fill in all fields');
+                return;
+            }
+
+            const os = detectOS();
+            if (os === 'unknown') {
+                showStatus('script', 'error', 'Could not detect your operating system. Please use manual upload.');
+                return;
+            }
+
+            try {
+                // Create session
+                const sessionRes = await fetch('/api/session/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const sessionData = await sessionRes.json();
+                sessionToken = sessionData.token;
+
+                // Download script
+                const scriptUrl = `/api/session/${sessionToken}/script/${os}`;
+                const a = document.createElement('a');
+                a.href = scriptUrl;
+                a.download = os === 'windows' ? 'anyrouter-launcher.ps1' : 'anyrouter-launcher.sh';
+                a.click();
+
+                // Show instructions
+                showInstructions(os);
+                showStatus('script', 'info', 'Script downloaded! Follow the instructions below.');
+
+                // Store data for later extraction
+                window.sessionData = { sessionToken, site, user, loginUrl };
+
+                // Poll for tunnel connection
+                pollTunnelStatus();
+
+            } catch (error) {
+                showStatus('script', 'error', `Error: ${error.message}`);
+            }
+        });
+
+        function showInstructions(os) {
+            const instructions = {
+                windows: `
+                    <li>Locate downloaded file: <code>anyrouter-launcher.ps1</code></li>
+                    <li>Right-click → "Run with PowerShell"</li>
+                    <li>If security warning appears, click "Run anyway"</li>
+                    <li>Wait for "SUCCESS" message</li>
+                    <li>Login to your website in the Chrome window that opens</li>
+                `,
+                macos: `
+                    <li>Open Terminal</li>
+                    <li>Run: <code>chmod +x ~/Downloads/anyrouter-launcher.sh</code></li>
+                    <li>Run: <code>~/Downloads/anyrouter-launcher.sh</code></li>
+                    <li>Wait for "SUCCESS" message</li>
+                    <li>Login to your website in the Chrome window that opens</li>
+                `,
+                linux: `
+                    <li>Open Terminal</li>
+                    <li>Run: <code>chmod +x ~/Downloads/anyrouter-launcher.sh</code></li>
+                    <li>Run: <code>~/Downloads/anyrouter-launcher.sh</code></li>
+                    <li>Wait for "SUCCESS" message</li>
+                    <li>Login to your website in the Chrome window that opens</li>
+                `
+            };
+
+            document.getElementById('script-steps').innerHTML = instructions[os];
+            document.getElementById('script-instructions').classList.add('active');
+        }
+
+        async function pollTunnelStatus() {
+            const maxAttempts = 120; // 10 minutes (120 * 5 sec)
+            let attempts = 0;
+
+            showStatus('script', 'info', '<span class="loader"></span>Waiting for tunnel connection...');
+
+            const interval = setInterval(async () => {
+                if (!window.sessionData) {
+                    clearInterval(interval);
+                    return;
+                }
+
+                attempts++;
+                if (attempts > maxAttempts) {
+                    clearInterval(interval);
+                    showStatus('script', 'error', 'Timeout waiting for tunnel connection. Please try again.');
+                    return;
+                }
+
+                try {
+                    // Check session status (not create new session!)
+                    const { sessionToken } = window.sessionData;
+                    const res = await fetch(`/api/session/${sessionToken}`, {
+                        method: 'GET',
+                        headers: { 'Content-Type': 'application/json' }
+                    });
+
+                    if (res.ok) {
+                        const data = await res.json();
+
+                        // If tunnel is connected, trigger extraction
+                        if (data.status === 'connected') {
+                            clearInterval(interval);
+                            showStatus('script', 'success', '✅ Tunnel connected! Now log in to your website...');
+
+                            // Wait 3 seconds for user to see the message, then wait for login
+                            setTimeout(() => {
+                                showStatus('script', 'info', '<span class="loader"></span>Waiting for you to log in...');
+                                // Start another poll to wait for user to complete login
+                                pollForLoginCompletion();
+                            }, 3000);
+                        }
+                    }
+
+                } catch (error) {
+                    // Continue polling on error
+                    console.error('Poll error:', error);
+                }
+            }, 5000);
+        }
+
+        async function pollForLoginCompletion() {
+            showStatus('script', 'info',
+                '<span class="loader"></span>After logging in, click the button below:<br>' +
+                '<button onclick="extractCookies()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Complete Setup & Extract Cookies</button>'
+            );
+        }
+
+        async function extractCookies() {
+            const { sessionToken, site, user, loginUrl } = window.sessionData;
+
+            showStatus('script', 'info', '<span class="loader"></span>Extracting cookies from browser...');
+
+            try {
+                const res = await fetch('/api/profiles/extract-from-tunnel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionToken, site, user, loginUrl })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('script', 'success', `✅ Profile created successfully! (${data.cookies} cookies extracted)`);
+                    window.sessionData = null;
+                } else {
+                    showStatus('script', 'error', `Error: ${data.error}`);
+                }
+
+            } catch (error) {
+                showStatus('script', 'error', `Error: ${error.message}`);
+            }
+        }
+
+        // Manual upload
+        document.getElementById('upload-cookies-btn').addEventListener('click', async () => {
+            const site = document.getElementById('manual-site').value.trim();
+            const user = document.getElementById('manual-user').value.trim();
+            const loginUrl = document.getElementById('manual-url').value.trim();
+            const cookiesJson = document.getElementById('cookies-json').value.trim();
+
+            if (!site || !user || !loginUrl || !cookiesJson) {
+                showStatus('manual', 'error', 'Please fill in all fields');
+                return;
+            }
+
+            try {
+                const cookies = JSON.parse(cookiesJson);
+
+                const res = await fetch('/api/profiles/upload', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ site, user, loginUrl, cookies })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('manual', 'success', `✅ Profile created successfully! ID: ${data.profileId}`);
+                    document.getElementById('cookies-json').value = '';
+                } else {
+                    showStatus('manual', 'error', `Error: ${data.error || 'Failed to create profile'}`);
+                }
+
+            } catch (error) {
+                showStatus('manual', 'error', `Error: ${error.message}`);
+            }
+        });
+
+        function showStatus(method, type, message) {
+            const statusEl = document.getElementById(`${method}-status`);
+            statusEl.className = `status ${type}`;
+            statusEl.innerHTML = message;
+        }
+    </script>
+</body>
+</html>

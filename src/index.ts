@@ -1,26 +1,32 @@
-import 'reflect-metadata';
-import { container } from './core/container';
-import { IConfigService, INotificationService, IMonitoringService } from './core/interfaces';
-import { TYPES } from './core/types';
-import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service';
-import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service';
+import { ServiceFactory } from './core/factory.js';
+import type { IConfigService, INotificationService, ILoginService } from './core/interfaces/index.js';
+import { InMemoryTaskQueue } from './infrastructure/queue/in-memory-task-queue.service.js';
+import { DevWebhookListener } from './infrastructure/dev/webhook-listener.service.js';
+import type { CookieWebApiService } from './infrastructure/web/cookie-web-api.service.js';
+import { LoginTask, TaskPriority } from './core/entities/login-task.entity.js';
 import path from 'path';
 
 async function main() {
   try {
     console.log('🚀 Starting Daily Login Assistant Bot...');
 
-    // Initialize services
-    const configService = container.get<IConfigService>(TYPES.ConfigService);
-    const notificationService = container.get<INotificationService>(TYPES.NotificationService);
-    const monitoringService = container.get<IMonitoringService>(TYPES.MonitoringService);
-    const _taskQueue = container.get<InMemoryTaskQueue>(TYPES.TaskQueue);
+    // Initialize services using factory
+    const configService: IConfigService = ServiceFactory.getConfigService();
+    const notificationService: INotificationService = ServiceFactory.getNotificationService();
+    const loginService: ILoginService = ServiceFactory.getLoginService();
+    const _taskQueue: InMemoryTaskQueue = ServiceFactory.getTaskQueue();
 
-    // Start webhook listener in development
+    // Start Cookie Web API for profile management (takes port 3001)
+    console.log('🌐 Starting Cookie Upload Web API...');
+    const cookieWebApi: CookieWebApiService = ServiceFactory.getCookieWebApi();
+    await cookieWebApi.start();
+    console.log('');
+
+    // Start webhook listener in development (only if cookie web API is not using port 3001)
     let webhookListener: DevWebhookListener | null = null;
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === 'development' && process.env.ENABLE_WEBHOOK_LISTENER === 'true') {
       try {
-        webhookListener = container.get<DevWebhookListener>(TYPES.DevWebhookListener);
+        webhookListener = new DevWebhookListener();
         await webhookListener.start();
       } catch {
         console.log('💡 Webhook listener not available (optional for development)');
@@ -50,7 +56,7 @@ async function main() {
     await notificationService.sendStartupNotification();
     console.log('Startup notification sent');
 
-    // Simple scheduling logic - runs every minute
+    // Enhanced scheduling logic with actual login tasks
     const runScheduledTasks = async () => {
       const now = new Date();
       const currentTime = now.toTimeString().substring(0, 5); // HH:MM format
@@ -58,17 +64,31 @@ async function main() {
       console.log(`Checking scheduled tasks at ${currentTime}`);
 
       for (const config of websiteConfigs) {
-        // Simple time-based scheduling (you can enhance this)
+        // Simple time-based scheduling
         if (config.schedule && config.schedule.time === currentTime) {
-          console.log(`Scheduling login task for ${config.name}`);
+          console.log(`Creating login task for ${config.name}`);
 
-          // Create a simple login task (you'll need to implement the LoginTask entity)
-          // For now, just log the action
-          console.log(`Would execute login for ${config.name} (${config.url})`);
+          // Create and process login task
+          const loginTask = new LoginTask(
+            `task_${config.id}_${Date.now()}`,
+            'default_account', // You can make this configurable
+            config.id,
+            TaskPriority.NORMAL,
+            new Date(),
+            config.automation?.retryAttempts || 3
+          );
 
-          monitoringService.recordLoginAttempt(config.id, 'system', 'success');
+          try {
+            const success = await loginService.processLoginTask(loginTask);
 
-          await notificationService.sendLoginSuccess(config.name, 'scheduled');
+            if (success) {
+              console.log(`✅ Login task completed successfully for ${config.name}`);
+            } else {
+              console.log(`❌ Login task failed for ${config.name}`);
+            }
+          } catch (error) {
+            console.error(`Error processing login task for ${config.name}:`, error);
+          }
         }
       }
     };
@@ -96,14 +116,18 @@ async function main() {
       await notificationService.sendShutdownNotification();
 
       // Get final stats
-      const stats = monitoringService.getStats();
-      console.log('Final statistics:', stats);
+      const loginStats = loginService.getMetrics();
+      console.log('Final statistics:', loginStats);
 
-      if (stats.totalLogins > 0) {
+      const totalAttempts = Number(loginStats.totalAttempts) || 0;
+      const successfulLogins = Number(loginStats.successfulLogins) || 0;
+      const failedLogins = Number(loginStats.failedLogins) || 0;
+
+      if (totalAttempts > 0) {
         await notificationService.sendDailySummary(
-          stats.totalLogins,
-          stats.successfulLogins,
-          stats.failedLogins
+          totalAttempts,
+          successfulLogins,
+          failedLogins
         );
       }
 
@@ -129,7 +153,7 @@ async function main() {
     console.error('Failed to start application:', error);
 
     try {
-      const notificationService = container.get<INotificationService>(TYPES.NotificationService);
+      const notificationService = ServiceFactory.getNotificationService();
       await notificationService.sendErrorNotification('Startup', (error as Error).message);
     } catch (notificationError) {
       console.error('Failed to send startup error notification:', notificationError);

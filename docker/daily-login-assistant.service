@@ -1,0 +1,31 @@
+[Unit]
+Description=Daily Login Assistant
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+Group=root
+WorkingDirectory=/opt/daily-login-assistant
+Environment=NODE_ENV=production
+Environment=PWA_PORT=8001
+Environment=PWA_HOST=0.0.0.0
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+ExecStart=/usr/bin/node dist/index.js
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=daily-login-assistant
+
+# Security settings for container
+# Note: Application is built during installation, not on every service start
+# To update: cd /opt/daily-login-assistant && git pull && npm install && npm run build && systemctl restart daily-login-assistant
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/opt/daily-login-assistant/profiles /opt/daily-login-assistant/logs /opt/daily-login-assistant/config
+
+[Install]
+WantedBy=multi-user.target

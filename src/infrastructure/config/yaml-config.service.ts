@@ -1,12 +1,11 @@
-import { injectable } from "inversify";
-import { IConfigService } from "../../core/interfaces";
+import { IConfigService } from "../../core/interfaces/index.js";
 import {
   WebsiteConfig,
   WebsiteSelectors,
   AutomationConfig,
   SecurityConfig,
   ScheduleConfig,
-} from "../../core/entities";
+} from "../../core/entities/index.js";
 import yaml from "js-yaml";
 import fs from "fs";
 import { promises as fsPromises } from "fs";
@@ -54,7 +53,6 @@ interface WebsiteConfigData {
   };
 }
 
-@injectable()
 export class YamlConfigService implements IConfigService {
   private config: ConfigData = {};
   private watchers: (() => void)[] = [];

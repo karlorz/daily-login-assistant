@@ -1,8 +1,6 @@
-import { injectable } from 'inversify';
 import { spawn } from 'child_process';
-import { INotificationService } from '../../core/interfaces';
+import { INotificationService } from '../../core/interfaces/index.js';
 
-@injectable()
 export class ShoutrrNotificationService implements INotificationService {
   async sendNotification(
     title: string,
