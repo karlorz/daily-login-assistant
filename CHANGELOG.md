@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/karlorz/daily-login-assistant/compare/v1.2.8...v1.3.0) (2025-10-12)
+
+
+### Features
+
+* Implement Playwright Browser Automation ([#3](https://github.com/karlorz/daily-login-assistant/issues/3)) ([37bbd8f](https://github.com/karlorz/daily-login-assistant/commit/37bbd8f35d27ad153142ce3a52eb46c30fc416ab)), closes [#2](https://github.com/karlorz/daily-login-assistant/issues/2) [#4](https://github.com/karlorz/daily-login-assistant/issues/4)
+
 ## [1.2.8](https://github.com/karlorz/daily-login-assistant/compare/v1.2.7...v1.2.8) (2025-09-28)
 
 
