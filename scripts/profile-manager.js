@@ -14,7 +14,9 @@ import dotenv from 'dotenv';
 import { execSync } from 'child_process';
 import os from 'os';
 
-dotenv.config({ path: '.env.development' });
+// Load environment variables based on NODE_ENV
+const envFile = process.env.NODE_ENV === 'production' ? '.env' : '.env.development';
+dotenv.config({ path: envFile });
 
 class ProfileManager {
   constructor() {
