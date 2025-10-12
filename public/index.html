@@ -199,12 +199,39 @@
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        .header-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .nav-link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .nav-link:hover {
+            background: #667eea;
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Daily Login Assistant</h1>
-        <p class="subtitle">Create a new profile for automated check-ins</p>
+        <div class="header-nav">
+            <div>
+                <h1>Daily Login Assistant</h1>
+                <p class="subtitle">Create a new profile for automated check-ins</p>
+            </div>
+            <a href="/profiles.html" class="nav-link">📋 Manage Profiles</a>
+        </div>
 
         <div class="method-selector">
             <button class="method-btn active" data-method="script">

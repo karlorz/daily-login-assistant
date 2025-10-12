@@ -88,6 +88,7 @@ export class CookieWebApiService {
     console.log(`   GET  /api/profiles                    - List all profiles`);
     console.log(`   POST /api/profiles/upload             - Upload cookies to create profile`);
     console.log(`   POST /api/profiles/:id/test           - Test profile check-in`);
+    console.log(`   POST /api/profiles/checkin-all        - Trigger check-in for all profiles`);
     console.log(`   DELETE /api/profiles/:id              - Delete profile`);
     console.log(`   POST /api/session/create              - Create new session`);
     console.log(`   GET  /api/session/:token              - Get session status`);
@@ -437,6 +438,53 @@ export class CookieWebApiService {
           headers: { 'Content-Type': 'application/json' }
         }
       );
+    }
+
+    // Trigger check-in for all profiles
+    if (pathname === '/api/profiles/checkin-all' && method === 'POST') {
+      try {
+        const profiles = await this.cookieService.getAllProfiles();
+        const results = [];
+
+        for (const profile of profiles) {
+          const result = await this.cookieService.testProfile(profile.id, profile.metadata.loginUrl);
+          results.push({
+            profileId: profile.id,
+            site: profile.metadata.site,
+            user: profile.metadata.user,
+            success: result.success,
+            error: result.error
+          });
+        }
+
+        const successCount = results.filter(r => r.success).length;
+        const failureCount = results.filter(r => !r.success).length;
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            total: results.length,
+            successful: successCount,
+            failed: failureCount,
+            results
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      } catch (error) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: error instanceof Error ? error.message : String(error)
+          }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
     }
 
     return new Response('Not Found', { status: 404 });
