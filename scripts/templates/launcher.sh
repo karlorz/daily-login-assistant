@@ -82,10 +82,19 @@ CHROME_PID=$!
 # 4. Establish SSH reverse tunnel
 echo "INFO: Establishing secure tunnel to our servers..."
 
-# Check if sshpass is available for password auth
-if command -v sshpass >/dev/null 2>&1; then
-  # Use sshpass for automated password authentication
-  # Bind to 0.0.0.0 to allow access from other containers
+# Try SSH key authentication first (non-interactive)
+if ssh -o BatchMode=yes -o ConnectTimeout=5 -p ${REMOTE_SSH_PORT} ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST} exit 2>/dev/null; then
+  echo "INFO: Using SSH key authentication"
+  ssh -R 0.0.0.0:${DEBUG_PORT}:localhost:${DEBUG_PORT} \
+    -N -f \
+    -o BatchMode=yes \
+    -o ExitOnForwardFailure=yes \
+    -p ${REMOTE_SSH_PORT} \
+    ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}
+  SSH_PID=$!
+elif [ -n "${SSH_PASSWORD}" ] && command -v sshpass >/dev/null 2>&1; then
+  # Use sshpass for automated password authentication if password is provided
+  echo "INFO: Using password authentication"
   sshpass -p "${SSH_PASSWORD}" ssh -R 0.0.0.0:${DEBUG_PORT}:localhost:${DEBUG_PORT} \
     -N -f \
     -o StrictHostKeyChecking=no \
@@ -95,14 +104,10 @@ if command -v sshpass >/dev/null 2>&1; then
     ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}
   SSH_PID=$!
 else
-  # Fallback: Manual password entry or use SSH keys
-  # Bind to 0.0.0.0 to allow access from other containers
-  echo "WARN: sshpass not found. You'll need to enter the password manually."
-  echo "Password: ${SSH_PASSWORD}"
+  # Fallback: Manual authentication (will use SSH agent or prompt for password)
+  echo "INFO: Attempting manual authentication (SSH agent or password prompt)"
   ssh -R 0.0.0.0:${DEBUG_PORT}:localhost:${DEBUG_PORT} \
     -N -f \
-    -o StrictHostKeyChecking=no \
-    -o UserKnownHostsFile=/dev/null \
     -o ExitOnForwardFailure=yes \
     -p ${REMOTE_SSH_PORT} \
     ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}
