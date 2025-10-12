@@ -1,6 +1,6 @@
 {
   "name": "daily-login-assistant",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "type": "module",
   "description": "Enterprise-grade automated daily login assistant bot for headless Ubuntu containers/Docker",
   "main": "dist/index.js",

@@ -1,3 +1,10 @@
+# [1.5.0](https://github.com/karlorz/daily-login-assistant/compare/v1.4.0...v1.5.0) (2025-10-12)
+
+
+### Features
+
+* auto-configure anyrouter endpoint based on deployment hostname ([a87e614](https://github.com/karlorz/daily-login-assistant/commit/a87e614f867917b04cf151fccc526a662d643129))
+
 # [1.4.0](https://github.com/karlorz/daily-login-assistant/compare/v1.3.0...v1.4.0) (2025-10-12)
 
 
