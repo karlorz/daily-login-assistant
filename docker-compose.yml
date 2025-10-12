@@ -54,6 +54,7 @@ services:
       API_ENDPOINT: ${API_ENDPOINT:-http://localhost:8001/api/tunnel-ready}
       ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:8001}
       PWA_PORT: ${PWA_PORT:-3001}
+      CDP_HOST: ${CDP_HOST:-ssh-tunnel:9222}  # Use ssh-tunnel service for Docker, localhost:9222 for production
     ports:
       - '127.0.0.1:8001:3001'
     working_dir: /app

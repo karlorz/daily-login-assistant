@@ -299,7 +299,7 @@ export class CookieWebApiService {
 
       const session = this.sessionManager.updateSession(sessionToken, {
         status: 'connected',
-        debugPort: 'ssh-tunnel:9222',
+        debugPort: process.env.CDP_HOST || 'localhost:9222',  // Use localhost for production, ssh-tunnel:9222 for Docker
         connectedAt: new Date(),
       });
 
@@ -356,7 +356,7 @@ export class CookieWebApiService {
         });
 
         // Extract cookies and localStorage via CDP
-        const debugPort = session.debugPort || 'ssh-tunnel:9222';
+        const debugPort = session.debugPort || process.env.CDP_HOST || 'localhost:9222';  // Use localhost for production, ssh-tunnel:9222 for Docker
         const storageState = await this.cdpExtractor.extractCookiesFromDebugPort(
           debugPort,
           loginUrl
