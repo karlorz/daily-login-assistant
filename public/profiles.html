@@ -245,6 +245,47 @@
         .back-link:hover {
             text-decoration: underline;
         }
+
+        .schedule-editor {
+            margin-top: 15px;
+            padding: 15px;
+            background: #edf2f7;
+            border-radius: 6px;
+            border-left: 3px solid #667eea;
+        }
+
+        .schedule-editor-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .schedule-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .schedule-input {
+            flex: 1;
+            min-width: 120px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .schedule-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
     </style>
 </head>
 <body>
@@ -332,6 +373,10 @@
                 new Date(profile.metadata.lastCheckin).toLocaleString() :
                 'Never';
 
+            // Get schedule from metadata (default to '09:00' if not set)
+            const schedule = profile.metadata.schedule || '09:00';
+            const timezone = profile.metadata.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
             return `
                 <div class="profile-card" data-profile-id="${profile.id}">
                     <div class="profile-header">
@@ -358,6 +403,22 @@
                         <div class="meta-item">
                             <div class="meta-label">Last Check-in:</div>
                             <div class="meta-value">${lastCheckin}</div>
+                        </div>
+                    </div>
+
+                    <div class="schedule-editor">
+                        <div class="schedule-editor-title">⏰ Daily Check-in Schedule</div>
+                        <div class="schedule-input-group">
+                            <input
+                                type="time"
+                                class="schedule-input"
+                                id="schedule-${profile.id}"
+                                value="${schedule}"
+                            />
+                            <span style="font-size: 13px; color: #718096;">${timezone}</span>
+                            <button class="btn btn-primary btn-small" onclick="updateSchedule('${profile.id}')">
+                                💾 Save Schedule
+                            </button>
                         </div>
                     </div>
 
@@ -461,6 +522,42 @@
 
         function refreshProfiles() {
             loadProfiles();
+        }
+
+        async function updateSchedule(profileId) {
+            const input = document.getElementById(`schedule-${profileId}`);
+            const schedule = input.value;
+
+            if (!schedule) {
+                showStatus('error', 'Please enter a valid time');
+                return;
+            }
+
+            showStatus('info', '<span class="loader"></span>Updating schedule...');
+
+            try {
+                const res = await fetch(`/api/profiles/${profileId}/schedule`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        schedule,
+                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                    })
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('success', `✓ Schedule updated to ${schedule}`);
+                    loadProfiles(); // Refresh to show updated schedule
+                } else {
+                    showStatus('error', `Schedule update failed: ${data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                showStatus('error', `Error: ${error.message}`);
+            }
         }
     </script>
 </body>

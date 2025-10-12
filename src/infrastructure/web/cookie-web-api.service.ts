@@ -215,6 +215,78 @@ export class CookieWebApiService {
       }
     }
 
+    // Update profile schedule
+    const scheduleMatch = pathname.match(/^\/api\/profiles\/([^/]+)\/schedule$/);
+    if (scheduleMatch && method === 'POST') {
+      const profileId = scheduleMatch[1];
+
+      try {
+        const body = await req.json() as {
+          schedule: string;
+          timezone: string;
+        };
+
+        const { schedule, timezone } = body;
+
+        if (!schedule) {
+          return new Response(
+            JSON.stringify({ error: 'Schedule time is required' }),
+            {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        }
+
+        // Update profile metadata with new schedule
+        const profiles = await this.cookieService.getAllProfiles();
+        const profile = profiles.find(p => p.id === profileId);
+
+        if (!profile) {
+          return new Response(
+            JSON.stringify({ error: 'Profile not found' }),
+            {
+              status: 404,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          );
+        }
+
+        // Update metadata
+        await this.cookieService.updateProfileMetadata(profileId, {
+          ...profile.metadata,
+          schedule,
+          timezone,
+          updatedAt: new Date().toISOString()
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            profileId,
+            schedule,
+            timezone,
+            message: 'Schedule updated successfully'
+          }),
+          {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      } catch (error: any) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            error: error.message
+          }),
+          {
+            status: 400,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+    }
+
     /* Delete profile endpoint temporarily disabled for safety
     // Delete profile
     const deleteMatch = pathname.match(/^\/api\/profiles\/([^/]+)$/);

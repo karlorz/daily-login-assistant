@@ -263,4 +263,11 @@ export class CookieProfileService {
     const metadataPath = path.join(profilePath, 'metadata.json');
     await fs.writeFile(metadataPath, JSON.stringify(metadata, null, 2));
   }
+
+  /**
+   * Update profile metadata (public method for API)
+   */
+  async updateProfileMetadata(profileId: string, metadata: any): Promise<void> {
+    await this.saveMetadata(profileId, metadata);
+  }
 }
