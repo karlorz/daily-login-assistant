@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/karlorz/daily-login-assistant/compare/v1.6.1...v1.6.2) (2025-10-12)
+
+
+### Bug Fixes
+
+* improve SSH authentication in launcher script to prefer key-based auth ([8a3a50b](https://github.com/karlorz/daily-login-assistant/commit/8a3a50b4d80c937ca39d60d11385cb3ea8e52291))
+
 ## [1.6.1](https://github.com/karlorz/daily-login-assistant/compare/v1.6.0...v1.6.1) (2025-10-12)
 
 
