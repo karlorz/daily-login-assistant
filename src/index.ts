@@ -41,13 +41,53 @@ async function main() {
 
     // Get website configurations
     const websiteConfigs = await configService.getAllWebsiteConfigs();
-    console.log(`Found ${websiteConfigs.length} enabled website configurations`);
 
-    if (websiteConfigs.length === 0) {
-      console.warn('No enabled websites found in configuration');
+    // Check for PWA profiles
+    const fs = await import('fs');
+    const profileDir = path.join(process.cwd(), 'profiles', 'user-guided');
+    let pwaProfileCount = 0;
+    try {
+      const files = fs.readdirSync(profileDir);
+      pwaProfileCount = files.filter(f => f.endsWith('.json')).length;
+    } catch {
+      // Profile directory doesn't exist yet
+    }
+
+    // Display authentication method information
+    console.log('');
+    console.log('==================================================');
+    console.log('  Authentication Methods Status');
+    console.log('==================================================');
+
+    if (pwaProfileCount > 0) {
+      console.log(`✅ PWA Method (PRIMARY): ${pwaProfileCount} profile(s) found`);
+      console.log(`   └─ Manage profiles: bun run profiles`);
+    } else {
+      console.log(`⚠️  PWA Method (PRIMARY): No profiles found`);
+      console.log(`   └─ Create profiles at: http://localhost:${process.env.PWA_PORT || 8001}`);
+      console.log(`   └─ Or run: bun run profiles setup <site> <user> <url>`);
+    }
+
+    console.log('');
+
+    if (websiteConfigs.length > 0) {
+      console.log(`📋 Legacy Auto-Fill Method: ${websiteConfigs.length} site(s) enabled`);
+      console.log(`   └─ Configure in: config/websites.yaml`);
+      console.log(`   ⚠️  Note: PWA method is recommended over auto-fill`);
+    } else {
+      console.log(`⏸️  Legacy Auto-Fill Method: Disabled (recommended)`);
+      console.log(`   └─ Enable sites in config/websites.yaml if needed`);
+    }
+
+    console.log('==================================================');
+    console.log('');
+
+    if (websiteConfigs.length === 0 && pwaProfileCount === 0) {
+      console.warn('⚠️  No authentication methods configured!');
+      console.warn('   Please create PWA profiles or enable sites in config/websites.yaml');
       await notificationService.sendNotification(
         'Configuration Warning',
-        'No enabled websites found in configuration',
+        'No authentication methods configured. Create PWA profiles or enable sites in config/websites.yaml',
         'warning'
       );
     }

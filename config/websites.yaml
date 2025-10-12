@@ -1,11 +1,30 @@
 websites:
+  # ============================================================================
+  # IMPORTANT: PWA Remote Server Method is the PRIMARY authentication method
+  # ============================================================================
+  # This file (websites.yaml) is for the LEGACY auto-fill credentials method.
+  #
+  # RECOMMENDED: Use PWA method instead
+  #   - Visit: http://localhost:8001 (or your production URL)
+  #   - Create profiles via browser-based authentication
+  #   - Supports OAuth, 2FA, any authentication method
+  #   - Zero maintenance - sessions last weeks/months
+  #
+  # This config is kept for:
+  #   - Testing the legacy auto-fill method
+  #   - Reference/documentation purposes
+  #   - Backwards compatibility
+  #
+  # All sites below are DISABLED by default. Enable only if needed for testing.
+  # ============================================================================
+
   # Fast and reliable demo sites for testing (in order of preference)
 
   # Option 1: Practice Test Automation (Very Fast & Reliable)
   - id: practice-login
     name: "Practice Test Automation"
     url: "https://practicetestautomation.com/practice-test-login/"
-    enabled: true
+    enabled: false  # Disabled by default - use PWA method instead
     schedule:
       time: "10:00"  # Change this to current time +1 minute to test
       timezone: "America/New_York"
