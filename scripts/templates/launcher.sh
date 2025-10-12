@@ -117,11 +117,23 @@ fi
 # Cleanup function to kill both Chrome and SSH tunnel
 cleanup() {
   echo "INFO: Cleaning up..."
-  kill $CHROME_PID 2>/dev/null
-  # Find and kill the SSH tunnel process
-  pkill -f "ssh.*-R ${DEBUG_PORT}:localhost:${DEBUG_PORT}.*${REMOTE_SSH_PORT}.*${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}" 2>/dev/null
+
+  # Kill local Chrome process
+  if [ -n "$CHROME_PID" ]; then
+    kill $CHROME_PID 2>/dev/null || true
+  fi
+
+  # Kill local SSH tunnel process
+  pkill -f "ssh.*-R ${DEBUG_PORT}:localhost:${DEBUG_PORT}.*${REMOTE_SSH_PORT}.*${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}" 2>/dev/null || true
+
+  # CRITICAL: Kill remote SSH tunnel (the sshd process listening on port 9222)
+  # This is necessary because -f daemonizes the SSH connection
+  ssh -p ${REMOTE_SSH_PORT} ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST} \
+    "pkill -u ${REMOTE_SSH_USER} -f 'sshd.*${DEBUG_PORT}'" 2>/dev/null || true
+
+  echo "INFO: Cleanup complete"
 }
-trap cleanup EXIT
+trap cleanup EXIT INT TERM
 
 # 5. Notify server
 echo "INFO: Connection established. Notifying server..."
