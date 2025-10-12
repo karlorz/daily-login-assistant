@@ -1,3 +1,17 @@
+# [1.9.0](https://github.com/karlorz/daily-login-assistant/compare/v1.8.0...v1.9.0) (2025-10-12)
+
+
+### Bug Fixes
+
+* lint ([31c9768](https://github.com/karlorz/daily-login-assistant/commit/31c97680ef46dc29bd98a98b074cfd764ac3d51f))
+
+
+### Features
+
+* add schedule editor for profile management ([a294ae8](https://github.com/karlorz/daily-login-assistant/commit/a294ae8c1f264b28e5ace593bdb4aa238a7b208b))
+* Add timezone selection and scheduled check-ins for profiles ([f23b100](https://github.com/karlorz/daily-login-assistant/commit/f23b10096e3f41b8073563cae04234ed230dea2c))
+* disable delete profile and add checkin-single command ([9d79220](https://github.com/karlorz/daily-login-assistant/commit/9d792201b82d5764646086cf8ab124a4d330ee4e))
+
 # [1.8.0](https://github.com/karlorz/daily-login-assistant/compare/v1.7.1...v1.8.0) (2025-10-12)
 
 
