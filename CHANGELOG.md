@@ -1,3 +1,10 @@
+## [1.6.5](https://github.com/karlorz/daily-login-assistant/compare/v1.6.4...v1.6.5) (2025-10-12)
+
+
+### Bug Fixes
+
+* prevent double cleanup and ensure remote SSH tunnel termination ([5e46c67](https://github.com/karlorz/daily-login-assistant/commit/5e46c6740b72df4e16b84ca9569f0d21d13adce0))
+
 ## [1.6.4](https://github.com/karlorz/daily-login-assistant/compare/v1.6.3...v1.6.4) (2025-10-12)
 
 
