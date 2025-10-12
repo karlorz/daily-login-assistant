@@ -11,6 +11,10 @@ import { CDPCookieExtractorService } from '../browser/cdp-cookie-extractor.servi
 import { SessionManagerService } from './session-manager.service.js';
 import type { Cookie } from 'playwright';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+const execPromise = promisify(exec);
 
 export class CookieWebApiService {
   private server: any | null = null;
@@ -89,7 +93,7 @@ export class CookieWebApiService {
     console.log(`   POST /api/profiles/upload             - Upload cookies to create profile`);
     console.log(`   POST /api/profiles/:id/test           - Test profile check-in`);
     console.log(`   POST /api/profiles/checkin-all        - Trigger check-in for all profiles`);
-    console.log(`   DELETE /api/profiles/:id              - Delete profile`);
+    // console.log(`   DELETE /api/profiles/:id              - Delete profile`);  // Temporarily disabled for safety
     console.log(`   POST /api/session/create              - Create new session`);
     console.log(`   GET  /api/session/:token              - Get session status`);
     console.log(`   GET  /api/session/:token/script/:os   - Download launcher script`);
@@ -173,40 +177,45 @@ export class CookieWebApiService {
       );
     }
 
-    // Test profile
+    // Test profile (performs actual daily check-in via CLI)
     const testMatch = pathname.match(/^\/api\/profiles\/([^/]+)\/test$/);
     if (testMatch && method === 'POST') {
       const profileId = testMatch[1];
-      const profiles = await this.cookieService.getAllProfiles();
-      const profile = profiles.find(p => p.id === profileId);
 
-      if (!profile) {
+      try {
+        // Call profile-manager CLI script for actual check-in with screenshots
+        const { stdout, stderr} = await execPromise(`node scripts/profile-manager.js checkin-single ${profileId}`);
+
         return new Response(
-          JSON.stringify({ error: 'Profile not found' }),
+          JSON.stringify({
+            success: true,
+            profileId,
+            message: 'Check-in successful',
+            output: stdout.substring(0, 500) // First 500 chars of output
+          }),
           {
-            status: 404,
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      } catch (error: any) {
+        return new Response(
+          JSON.stringify({
+            success: false,
+            profileId,
+            error: error.message,
+            message: 'Check-in failed',
+            output: error.stdout?.substring(0, 500)
+          }),
+          {
+            status: 400,
             headers: { 'Content-Type': 'application/json' }
           }
         );
       }
-
-      const result = await this.cookieService.testProfile(profileId, profile.metadata.loginUrl);
-
-      return new Response(
-        JSON.stringify({
-          success: result.success,
-          profileId,
-          cookies: result.cookies?.length || 0,
-          error: result.error,
-          message: result.success ? 'Check-in successful' : 'Check-in failed'
-        }),
-        {
-          status: result.success ? 200 : 400,
-          headers: { 'Content-Type': 'application/json' }
-        }
-      );
     }
 
+    /* Delete profile endpoint temporarily disabled for safety
     // Delete profile
     const deleteMatch = pathname.match(/^\/api\/profiles\/([^/]+)$/);
     if (deleteMatch && method === 'DELETE') {
@@ -226,6 +235,7 @@ export class CookieWebApiService {
         }
       );
     }
+    */
 
     // Create new session
     if (pathname === '/api/session/create' && method === 'POST') {
@@ -440,44 +450,36 @@ export class CookieWebApiService {
       );
     }
 
-    // Trigger check-in for all profiles
+    // Trigger check-in for all profiles (via CLI)
     if (pathname === '/api/profiles/checkin-all' && method === 'POST') {
       try {
+        // Call profile-manager CLI script for all check-ins
+        const { stdout, stderr } = await execPromise('node scripts/profile-manager.js checkin-all');
+
+        // Parse output to get results (simple parsing of CLI output)
         const profiles = await this.cookieService.getAllProfiles();
-        const results = [];
-
-        for (const profile of profiles) {
-          const result = await this.cookieService.testProfile(profile.id, profile.metadata.loginUrl);
-          results.push({
-            profileId: profile.id,
-            site: profile.metadata.site,
-            user: profile.metadata.user,
-            success: result.success,
-            error: result.error
-          });
-        }
-
-        const successCount = results.filter(r => r.success).length;
-        const failureCount = results.filter(r => !r.success).length;
+        const successMatch = stdout.match(/✅ Daily check-in successful/g);
+        const failMatch = stdout.match(/❌ Daily check-in failed/g);
 
         return new Response(
           JSON.stringify({
             success: true,
-            total: results.length,
-            successful: successCount,
-            failed: failureCount,
-            results
+            total: profiles.length,
+            successful: successMatch ? successMatch.length : 0,
+            failed: failMatch ? failMatch.length : 0,
+            output: stdout.substring(0, 1000) // First 1000 chars
           }),
           {
             status: 200,
             headers: { 'Content-Type': 'application/json' }
           }
         );
-      } catch (error) {
+      } catch (error: any) {
         return new Response(
           JSON.stringify({
             success: false,
-            error: error instanceof Error ? error.message : String(error)
+            error: error.message,
+            output: error.stdout?.substring(0, 1000)
           }),
           {
             status: 500,

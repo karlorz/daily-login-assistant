@@ -197,6 +197,26 @@ class ProfileManager {
   }
 
   /**
+   * Run daily check-in by profileId (for API/web UI)
+   */
+  async runDailyCheckinById(profileId) {
+    console.log(`🎯 Running daily check-in: ${profileId}`);
+
+    // Get metadata to retrieve site, user, and loginUrl
+    const metadata = await this.getProfileMetadata(profileId);
+
+    if (!metadata) {
+      console.error(`❌ Metadata not found for profile: ${profileId}`);
+      return false;
+    }
+
+    const { site, user, loginUrl } = metadata;
+
+    // Reuse existing check-in logic
+    return await this.runDailyCheckin(site, user, loginUrl);
+  }
+
+  /**
    * List all profiles with their status
    */
   async listProfiles() {
@@ -420,6 +440,15 @@ async function main() {
         await manager.runDailyCheckin(args[1], args[2], args[3]);
         break;
 
+      case 'checkin-single':
+        if (args.length < 2) {
+          console.log('Usage: node profile-manager.js checkin-single <profile-id>');
+          console.log('Example: node profile-manager.js checkin-single anyroutertop-user1');
+          break;
+        }
+        await manager.runDailyCheckinById(args[1]);
+        break;
+
       case 'list':
         await manager.listProfiles();
         break;
@@ -448,6 +477,7 @@ Commands:
   setup <site> <user> <url>    Setup new profile (opens browser for login)
   test <site> <user> <url>     Test existing profile session
   checkin <site> <user> <url>  Run daily check-in for profile
+  checkin-single <profile-id>  Run check-in for a single profile by ID
   list                         List all profiles with status
   checkin-all                  Run daily check-ins for all profiles
   cleanup <site> <user>        Remove specific profile
@@ -466,12 +496,15 @@ Examples:
   # List all profiles
   node profile-manager.js list
 
+  # Run check-in for single profile (by ID)
+  node profile-manager.js checkin-single anyroutertop-user1
+
   # Run daily check-ins for all profiles
   node profile-manager.js checkin-all
 
 Profile Naming:
   - Profiles are named: {site}-{user}
-  - anyrouter.top + user1 → anyrouter-user1
+  - anyrouter.top + user1 → anyroutertop-user1
   - discord.com + user2 → discord-user2
   - Each profile maintains separate login sessions
 `);
