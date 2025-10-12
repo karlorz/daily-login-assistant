@@ -240,27 +240,38 @@ else
 fi
 msg_ok "System dependencies installed"
 
-# Install Node.js 20 runtime (for production Docker)
-if ! command -v node &>/dev/null; then
-    msg_info "Installing Node.js 20 runtime"
-    if [[ "$OS" == "Debian" ]]; then
-        # Debian/Ubuntu - Use NodeSource repository for Node.js 20
-        curl -fsSL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
-        bash /tmp/nodesource_setup.sh &>/dev/null
-        apt-get install -y nodejs &>/dev/null
-        rm -f /tmp/nodesource_setup.sh
+# Install Bun runtime (for production)
+if ! command -v bun &>/dev/null; then
+    msg_info "Installing Bun runtime"
+
+    # Install Bun using the official installer
+    curl -fsSL https://bun.sh/install | bash &>/dev/null
+
+    # Set up Bun environment variables
+    export BUN_INSTALL="$HOME/.bun"
+    export PATH="$BUN_INSTALL/bin:$PATH"
+    echo 'export BUN_INSTALL="$HOME/.bun"' >> /etc/profile
+    echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> /etc/profile
+
+    # Verify installation
+    if command -v bun &>/dev/null; then
+        msg_ok "Bun runtime installed: $(bun --version)"
     else
-        # Alpine Linux - Install Node.js 20
-        apk add --no-cache nodejs npm &>/dev/null
+        msg_error "Bun installation failed, falling back to Node.js"
+
+        # Fallback to Node.js if Bun fails
+        if [[ "$OS" == "Debian" ]]; then
+            curl -fsSL https://deb.nodesource.com/setup_20.x -o /tmp/nodesource_setup.sh
+            bash /tmp/nodesource_setup.sh &>/dev/null
+            apt-get install -y nodejs &>/dev/null
+            rm -f /tmp/nodesource_setup.sh
+        else
+            apk add --no-cache nodejs npm &>/dev/null
+        fi
+        msg_ok "Node.js runtime installed as fallback: $(node --version)"
     fi
-
-    # Set up environment variables
-    export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
-    echo 'export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"' >> /etc/profile
-
-    msg_ok "Node.js runtime installed: $(node --version)"
 else
-    msg_ok "Node.js runtime already installed ($(node --version))"
+    msg_ok "Bun runtime already installed ($(bun --version))"
 fi
 
 # Configure SSH (if needed)
@@ -291,8 +302,14 @@ msg_ok "Repository cloned"
 # Install application dependencies
 msg_info "Installing application dependencies"
 cd "$INSTALL_DIR"
-export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
-npm install &>/dev/null
+export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Use Bun if available, otherwise npm
+if command -v bun &>/dev/null; then
+    bun install &>/dev/null
+else
+    npm install &>/dev/null
+fi
 msg_ok "Application dependencies installed"
 
 # Install Playwright browsers (skip in container for faster testing)
@@ -350,6 +367,15 @@ if [[ "$FORCE_SYSTEMD" == "true" ]] || [[ "$IS_CONTAINER" == "false" ]]; then
         msg_info "Creating systemd service"
     fi
     
+    # Detect runtime (Bun or Node.js)
+    if command -v bun &>/dev/null; then
+        RUNTIME_CMD="$BUN_INSTALL/bin/bun"
+        RUNTIME_NAME="Bun"
+    else
+        RUNTIME_CMD="/usr/bin/node"
+        RUNTIME_NAME="Node.js"
+    fi
+
     cat <<EOF >"$SERVICE_PATH"
 [Unit]
 Description=Daily Login Assistant
@@ -364,8 +390,8 @@ WorkingDirectory=${INSTALL_DIR}
 Environment=NODE_ENV=production
 Environment=PWA_PORT=${PORT}
 Environment=PWA_HOST=0.0.0.0
-Environment=PATH=/usr/local/bin:/usr/bin:/bin
-ExecStart=/usr/bin/node dist/index.js
+Environment=PATH=${BUN_INSTALL}/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=${RUNTIME_CMD} run dist/index.js
 Restart=always
 RestartSec=10
 StandardOutput=journal
@@ -385,7 +411,7 @@ EOF
     # Reload systemd and enable service
     systemctl daemon-reload &>/dev/null
     systemctl enable -q --now daily-login-assistant.service
-    msg_ok "Systemd service created and started"
+    msg_ok "Systemd service created and started (using ${RUNTIME_NAME})"
 
 else
     # Container mode without FORCE_SYSTEMD - use direct startup
