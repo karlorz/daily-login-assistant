@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/karlorz/daily-login-assistant/compare/v1.6.0...v1.6.1) (2025-10-12)
+
+
+### Bug Fixes
+
+* restore full launcher.sh template with SSH tunnel functionality ([cab44ba](https://github.com/karlorz/daily-login-assistant/commit/cab44ba3a42fee63872b8b54ec5d617fd68b85f3))
+
 # [1.6.0](https://github.com/karlorz/daily-login-assistant/compare/v1.5.1...v1.6.0) (2025-10-12)
 
 
