@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/karlorz/daily-login-assistant/compare/v1.5.1...v1.6.0) (2025-10-12)
+
+
+### Features
+
+* improve startup logging and disable legacy auth by default ([69788dc](https://github.com/karlorz/daily-login-assistant/commit/69788dc63898426e8372710f6098389443aa6130))
+
 ## [1.5.1](https://github.com/karlorz/daily-login-assistant/compare/v1.5.0...v1.5.1) (2025-10-12)
 
 
