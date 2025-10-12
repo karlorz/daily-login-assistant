@@ -35,9 +35,6 @@ describeOrSkip('CookieWebApiService', () => {
       delete process.env.REMOTE_SSH_PORT;
       service = new CookieWebApiService();
 
-      // Access the private method via reflection for testing
-      const generateScript = (service as any).generateLauncherScript.bind(service);
-
       // We'll verify this in the script generation test below
       expect(service).toBeDefined();
     });

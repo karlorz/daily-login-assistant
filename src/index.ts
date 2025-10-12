@@ -103,6 +103,7 @@ async function main() {
 
       console.log(`Checking scheduled tasks at ${currentTime}`);
 
+      // Check legacy website configs from YAML
       for (const config of websiteConfigs) {
         // Simple time-based scheduling
         if (config.schedule && config.schedule.time === currentTime) {
@@ -130,6 +131,56 @@ async function main() {
             console.error(`Error processing login task for ${config.name}:`, error);
           }
         }
+      }
+
+      // Check PWA profiles for scheduled check-ins
+      try {
+        const { exec } = await import('child_process');
+        const { promisify } = await import('util');
+        const execPromise = promisify(exec);
+
+        // Get all PWA profiles
+        const profilesResponse = await fetch('http://localhost:' + (process.env.PWA_PORT || '3001') + '/api/profiles');
+        if (profilesResponse.ok) {
+          const profilesData = await profilesResponse.json() as { profiles: Array<{ id: string; metadata: any }> };
+          
+          for (const profile of profilesData.profiles) {
+            const { schedule, timezone } = profile.metadata;
+            
+            if (schedule && timezone) {
+              // Convert current time to profile's timezone
+              const profileTime = new Date().toLocaleString('en-US', {
+                timeZone: timezone,
+                hour12: false,
+                hour: '2-digit',
+                minute: '2-digit'
+              }).substring(0, 5); // Get HH:MM
+
+              if (schedule === profileTime) {
+                console.log(`⏰ Triggering scheduled check-in for ${profile.metadata.site} (${profile.metadata.user}) at ${schedule} ${timezone}`);
+                
+                try {
+                  // Trigger check-in via profile-manager CLI
+                  const { stdout, stderr } = await execPromise(
+                    `node scripts/profile-manager.js checkin-single ${profile.id}`
+                  );
+                  
+                  if (stdout.includes('✅')) {
+                    console.log(`✅ Scheduled check-in successful for ${profile.metadata.site} (${profile.metadata.user})`);
+                  } else {
+                    console.log(`❌ Scheduled check-in failed for ${profile.metadata.site} (${profile.metadata.user})`);
+                    if (stderr) console.error('Error output:', stderr);
+                  }
+                } catch (error: any) {
+                  console.error(`❌ Error during scheduled check-in for ${profile.metadata.site}:`, error.message);
+                }
+              }
+            }
+          }
+        }
+      } catch (error) {
+        // Silently fail if PWA server is not available or profiles can't be checked
+        // This is expected during startup or if PWA feature is not enabled
       }
     };
 

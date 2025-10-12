@@ -282,9 +282,46 @@
             border-color: #667eea;
         }
 
+        .timezone-input {
+            flex: 2;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 14px;
+            background: white;
+        }
+
+        .timezone-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .input-label {
+            font-size: 12px;
+            color: #718096;
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .schedule-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 120px;
+            flex: 1;
+        }
+
         .btn-small {
             padding: 8px 16px;
             font-size: 13px;
+            white-space: nowrap;
         }
     </style>
 </head>
@@ -404,21 +441,39 @@
                             <div class="meta-label">Last Check-in:</div>
                             <div class="meta-value">${lastCheckin}</div>
                         </div>
+                        <div class="meta-item">
+                            <div class="meta-label">Schedule:</div>
+                            <div class="meta-value">${schedule} (${timezone.replace('_', ' ')})</div>
+                        </div>
                     </div>
 
                     <div class="schedule-editor">
                         <div class="schedule-editor-title">⏰ Daily Check-in Schedule</div>
-                        <div class="schedule-input-group">
-                            <input
-                                type="time"
-                                class="schedule-input"
-                                id="schedule-${profile.id}"
-                                value="${schedule}"
-                            />
-                            <span style="font-size: 13px; color: #718096;">${timezone}</span>
-                            <button class="btn btn-primary btn-small" onclick="updateSchedule('${profile.id}')">
-                                💾 Save Schedule
-                            </button>
+                        <div class="schedule-row">
+                            <div class="input-group">
+                                <div class="input-label">Time</div>
+                                <input
+                                    type="time"
+                                    class="schedule-input"
+                                    id="schedule-${profile.id}"
+                                    value="${schedule}"
+                                />
+                            </div>
+                            <div class="input-group">
+                                <div class="input-label">Timezone</div>
+                                <select
+                                    class="timezone-input"
+                                    id="timezone-${profile.id}"
+                                >
+                                    ${generateTimezoneOptions(timezone)}
+                                </select>
+                            </div>
+                            <div class="input-group" style="justify-content: flex-end;">
+                                <div class="input-label" style="opacity: 0;">.</div>
+                                <button class="btn btn-primary btn-small" onclick="updateSchedule('${profile.id}')">
+                                    💾 Save
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -525,11 +580,18 @@
         }
 
         async function updateSchedule(profileId) {
-            const input = document.getElementById(`schedule-${profileId}`);
-            const schedule = input.value;
+            const timeInput = document.getElementById(`schedule-${profileId}`);
+            const timezoneInput = document.getElementById(`timezone-${profileId}`);
+            const schedule = timeInput.value;
+            const timezone = timezoneInput.value;
 
             if (!schedule) {
                 showStatus('error', 'Please enter a valid time');
+                return;
+            }
+
+            if (!timezone) {
+                showStatus('error', 'Please select a timezone');
                 return;
             }
 
@@ -543,14 +605,14 @@
                     },
                     body: JSON.stringify({
                         schedule,
-                        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+                        timezone
                     })
                 });
 
                 const data = await res.json();
 
                 if (data.success) {
-                    showStatus('success', `✓ Schedule updated to ${schedule}`);
+                    showStatus('success', `✓ Schedule updated to ${schedule} (${timezone})`);
                     loadProfiles(); // Refresh to show updated schedule
                 } else {
                     showStatus('error', `Schedule update failed: ${data.error || 'Unknown error'}`);
@@ -558,6 +620,102 @@
             } catch (error) {
                 showStatus('error', `Error: ${error.message}`);
             }
+        }
+
+        /**
+         * Generate timezone options HTML
+         */
+        function generateTimezoneOptions(currentTimezone) {
+            // Common timezones organized by region
+            const timezones = [
+                // North America
+                { group: 'North America', zones: [
+                    'America/New_York',
+                    'America/Chicago',
+                    'America/Denver', 
+                    'America/Los_Angeles',
+                    'America/Toronto',
+                    'America/Vancouver',
+                    'America/Mexico_City'
+                ]},
+                // Europe
+                { group: 'Europe', zones: [
+                    'Europe/London',
+                    'Europe/Paris',
+                    'Europe/Berlin',
+                    'Europe/Rome',
+                    'Europe/Madrid',
+                    'Europe/Amsterdam',
+                    'Europe/Brussels',
+                    'Europe/Vienna',
+                    'Europe/Zurich',
+                    'Europe/Stockholm',
+                    'Europe/Helsinki',
+                    'Europe/Moscow'
+                ]},
+                // Asia
+                { group: 'Asia', zones: [
+                    'Asia/Tokyo',
+                    'Asia/Seoul',
+                    'Asia/Shanghai',
+                    'Asia/Hong_Kong',
+                    'Asia/Singapore',
+                    'Asia/Bangkok',
+                    'Asia/Jakarta',
+                    'Asia/Manila',
+                    'Asia/Kuala_Lumpur',
+                    'Asia/Taipei',
+                    'Asia/Delhi',
+                    'Asia/Dubai',
+                    'Asia/Kolkata'
+                ]},
+                // Australia & Oceania
+                { group: 'Australia & Oceania', zones: [
+                    'Australia/Sydney',
+                    'Australia/Melbourne',
+                    'Australia/Brisbane',
+                    'Australia/Perth',
+                    'Pacific/Auckland',
+                    'Pacific/Honolulu'
+                ]},
+                // Other regions
+                { group: 'Other', zones: [
+                    'UTC',
+                    'GMT',
+                    'Africa/Cairo',
+                    'Africa/Johannesburg',
+                    'America/Sao_Paulo',
+                    'America/Argentina/Buenos_Aires'
+                ]}
+            ];
+
+            let html = '';
+            
+            // Add browser's detected timezone as the first option if not already in list
+            const browserTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const allZones = timezones.flatMap(group => group.zones);
+            
+            if (!allZones.includes(browserTimezone)) {
+                const selected = currentTimezone === browserTimezone ? 'selected' : '';
+                html += `<option value="${browserTimezone}" ${selected}>${browserTimezone} (Browser Detected)</option>`;
+            }
+
+            // Add grouped options
+            timezones.forEach(group => {
+                html += `<optgroup label="${group.group}">`;
+                group.zones.forEach(zone => {
+                    const selected = currentTimezone === zone ? 'selected' : '';
+                    const displayName = zone.replace('_', ' ').replace('/', ' / ');
+                    
+                    // Add browser detected indicator for browser timezone
+                    const indicator = zone === browserTimezone ? ' (Browser Detected)' : '';
+                    
+                    html += `<option value="${zone}" ${selected}>${displayName}${indicator}</option>`;
+                });
+                html += `</optgroup>`;
+            });
+
+            return html;
         }
     </script>
 </body>

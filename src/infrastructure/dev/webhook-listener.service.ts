@@ -4,8 +4,9 @@ export class DevWebhookListener {
   private port: number;
 
   constructor() {
-    // Use configurable port from environment, default to 3001
-    this.port = parseInt(process.env.WEBHOOK_PORT || '3001', 10);
+    // Use configurable port from environment, default to 3002 (avoid conflict with PWA on 3001)
+    this.port = parseInt(process.env.WEBHOOK_PORT || '3002', 10);
+    console.log(`📝 Webhook listener will use port: ${this.port} (WEBHOOK_PORT=${process.env.WEBHOOK_PORT || 'not set'})`);
   }
 
   async start(): Promise<void> {

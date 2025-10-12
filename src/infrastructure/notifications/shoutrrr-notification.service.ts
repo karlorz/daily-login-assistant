@@ -2,6 +2,15 @@ import { spawn } from 'child_process';
 import { INotificationService } from '../../core/interfaces/index.js';
 
 export class ShoutrrNotificationService implements INotificationService {
+  private failedUrls: Set<string> = new Set();
+  private silenceErrors: boolean = false;
+
+  constructor() {
+    // Silence errors if using logger:// only (common in development)
+    const urls = process.env.NOTIFICATION_URLS?.split(',').map(u => u.trim()) || [];
+    this.silenceErrors = urls.length === 1 && urls[0] === 'logger://';
+  }
+
   async sendNotification(
     title: string,
     message: string,
@@ -10,7 +19,9 @@ export class ShoutrrNotificationService implements INotificationService {
     const urls = process.env.NOTIFICATION_URLS?.split(',') || [];
 
     if (urls.length === 0) {
-      console.warn('No notification URLs configured');
+      if (!this.silenceErrors) {
+        console.warn('⚠️  No notification URLs configured (set NOTIFICATION_URLS environment variable)');
+      }
       return;
     }
 
@@ -18,12 +29,68 @@ export class ShoutrrNotificationService implements INotificationService {
     const formattedMessage = `${emoji} **${title}**\n${message}`;
 
     for (const url of urls) {
-      try {
-        await this.sendToUrl(url.trim(), formattedMessage);
-        console.log(`Notification sent successfully to ${url.split('://')[0]}`);
-      } catch (error) {
-        console.error(`Failed to send notification to ${url}`, error);
+      const trimmedUrl = url.trim();
+      
+      // Skip if this URL has failed before (avoid spamming errors)
+      if (this.failedUrls.has(trimmedUrl)) {
+        continue;
       }
+
+      try {
+        await this.sendToUrl(trimmedUrl, formattedMessage);
+        console.log(`Notification sent successfully to ${trimmedUrl.split('://')[0]}`);
+      } catch (error) {
+        // Mark as failed to prevent repeated errors
+        this.failedUrls.add(trimmedUrl);
+        
+        // Show user-friendly error message
+        this.handleNotificationError(trimmedUrl, error);
+      }
+    }
+  }
+
+  private handleNotificationError(url: string, error: any): void {
+    const protocol = url.split('://')[0];
+    const errorMsg = error instanceof Error ? error.message : String(error);
+
+    // Parse common error scenarios
+    if (errorMsg.includes('404 Not Found') || errorMsg.includes('ECONNREFUSED')) {
+      console.warn(`⚠️  Notification service unreachable: ${protocol}:// (${url.split('://')[1]?.split('?')[0] || 'unknown'})`);
+      console.warn(`   💡 Tip: Check if the service is running or use NOTIFICATION_URLS=logger:// for console-only notifications`);
+    } else if (errorMsg.includes('Failed to spawn shoutrrr')) {
+      console.warn(`⚠️  Shoutrrr CLI not found. Install with: go install github.com/nicholas-fedor/shoutrrr@latest`);
+      console.warn(`   💡 Or use NOTIFICATION_URLS=logger:// for console-only notifications`);
+    } else if (errorMsg.includes('timed out')) {
+      console.warn(`⚠️  Notification timeout for ${protocol}:// - service may be slow or unreachable`);
+    } else {
+      // Only show detailed error in development or if not silenced
+      if (process.env.NODE_ENV === 'development' && !this.silenceErrors) {
+        console.warn(`⚠️  Notification failed for ${protocol}://:`, errorMsg.split('\n')[0]);
+      }
+    }
+
+    // Show one-time suggestion to fix configuration
+    if (this.failedUrls.size === 1) {
+      console.log('');
+      console.log('═══════════════════════════════════════════════════════════');
+      console.log('  Notification Configuration Help');
+      console.log('═══════════════════════════════════════════════════════════');
+      console.log('  To fix notification errors, update NOTIFICATION_URLS:');
+      console.log('');
+      console.log('  Option 1: Console-only (no external services)');
+      console.log('    export NOTIFICATION_URLS="logger://"');
+      console.log('');
+      console.log('  Option 2: Discord');
+      console.log('    export NOTIFICATION_URLS="discord://token@channel"');
+      console.log('');
+      console.log('  Option 3: Multiple services');
+      console.log('    export NOTIFICATION_URLS="logger://,discord://token@channel"');
+      console.log('');
+      console.log('  Option 4: Development webhook (requires webhook listener)');
+      console.log('    export NOTIFICATION_URLS="logger://,generic://localhost:3001"');
+      console.log('    NODE_ENV=development ENABLE_WEBHOOK_LISTENER=true bun run dev');
+      console.log('═══════════════════════════════════════════════════════════');
+      console.log('');
     }
   }
 

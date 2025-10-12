@@ -5,7 +5,6 @@
  * No VNC/Xvfb required - minimal resource usage
  */
 
-import type { Server } from 'bun';
 import { CookieProfileService } from '../browser/cookie-profile.service.js';
 import { CDPCookieExtractorService } from '../browser/cdp-cookie-extractor.service.js';
 import { SessionManagerService } from './session-manager.service.js';
@@ -184,7 +183,7 @@ export class CookieWebApiService {
 
       try {
         // Call profile-manager CLI script for actual check-in with screenshots
-        const { stdout, stderr} = await execPromise(`node scripts/profile-manager.js checkin-single ${profileId}`);
+        const { stdout } = await execPromise(`node scripts/profile-manager.js checkin-single ${profileId}`);
 
         return new Response(
           JSON.stringify({
@@ -526,7 +525,7 @@ export class CookieWebApiService {
     if (pathname === '/api/profiles/checkin-all' && method === 'POST') {
       try {
         // Call profile-manager CLI script for all check-ins
-        const { stdout, stderr } = await execPromise('node scripts/profile-manager.js checkin-all');
+        const { stdout } = await execPromise('node scripts/profile-manager.js checkin-all');
 
         // Parse output to get results (simple parsing of CLI output)
         const profiles = await this.cookieService.getAllProfiles();

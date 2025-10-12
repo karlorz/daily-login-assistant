@@ -396,7 +396,7 @@ bun run dev
 lsof -i :3001
 
 # Change port in .env.development
-WEBHOOK_PORT=3002
+WEBHOOK_PORT=3001
 ```
 
 ## Testing Best Practices
