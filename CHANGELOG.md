@@ -1,3 +1,10 @@
+## [1.6.4](https://github.com/karlorz/daily-login-assistant/compare/v1.6.3...v1.6.4) (2025-10-12)
+
+
+### Bug Fixes
+
+* resolve CDP connection failures with environment-aware hostname configuration ([e2be2fd](https://github.com/karlorz/daily-login-assistant/commit/e2be2fd3432e8bfcbaaece1da3a82397d0c43c96))
+
 ## [1.6.3](https://github.com/karlorz/daily-login-assistant/compare/v1.6.2...v1.6.3) (2025-10-12)
 
 
