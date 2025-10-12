@@ -116,6 +116,12 @@ fi
 
 # Cleanup function to kill both Chrome and SSH tunnel
 cleanup() {
+  # Prevent double execution
+  if [ "${CLEANUP_DONE:-0}" = "1" ]; then
+    return 0
+  fi
+  export CLEANUP_DONE=1
+
   echo "INFO: Cleaning up..."
 
   # Kill local Chrome process
@@ -126,10 +132,11 @@ cleanup() {
   # Kill local SSH tunnel process
   pkill -f "ssh.*-R ${DEBUG_PORT}:localhost:${DEBUG_PORT}.*${REMOTE_SSH_PORT}.*${REMOTE_SSH_USER}@${REMOTE_SSH_HOST}" 2>/dev/null || true
 
-  # CRITICAL: Kill remote SSH tunnel (the sshd process listening on port 9222)
+  # CRITICAL: Kill ALL sshd processes for tunnel user on remote
   # This is necessary because -f daemonizes the SSH connection
-  ssh -p ${REMOTE_SSH_PORT} ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST} \
-    "pkill -u ${REMOTE_SSH_USER} -f 'sshd.*${DEBUG_PORT}'" 2>/dev/null || true
+  # and the sshd process doesn't show port number in its command line
+  ssh -o BatchMode=yes -o ConnectTimeout=3 -p ${REMOTE_SSH_PORT} ${REMOTE_SSH_USER}@${REMOTE_SSH_HOST} \
+    "pkill -u ${REMOTE_SSH_USER} sshd" 2>/dev/null || true
 
   echo "INFO: Cleanup complete"
 }
