@@ -1,3 +1,10 @@
+## [1.7.1](https://github.com/karlorz/daily-login-assistant/compare/v1.7.0...v1.7.1) (2025-10-12)
+
+
+### Bug Fixes
+
+* respect NODE_ENV for environment file selection in profile manager ([3fc3efc](https://github.com/karlorz/daily-login-assistant/commit/3fc3efc4310415c477ef27e36bafdb9e8f35d097))
+
 # [1.7.0](https://github.com/karlorz/daily-login-assistant/compare/v1.6.5...v1.7.0) (2025-10-12)
 
 
