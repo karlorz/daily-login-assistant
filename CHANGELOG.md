@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/karlorz/daily-login-assistant/compare/v1.5.0...v1.5.1) (2025-10-12)
+
+
+### Bug Fixes
+
+* Default SSH port to 22 and update environment docs ([9377615](https://github.com/karlorz/daily-login-assistant/commit/93776150aac38f283e6a61fd7e9a3932bc58156b))
+
 # [1.5.0](https://github.com/karlorz/daily-login-assistant/compare/v1.4.0...v1.5.0) (2025-10-12)
 
 
