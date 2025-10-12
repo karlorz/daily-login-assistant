@@ -1,3 +1,17 @@
+# [1.4.0](https://github.com/karlorz/daily-login-assistant/compare/v1.3.0...v1.4.0) (2025-10-12)
+
+
+### Bug Fixes
+
+* install and use Bun runtime for production deployment ([cd390b9](https://github.com/karlorz/daily-login-assistant/commit/cd390b97e6bf16cb5f05e6f78a4e39354c966cfb))
+* resolve TypeScript Server generic type compatibility issue for npm/tsc ([ea8e9f3](https://github.com/karlorz/daily-login-assistant/commit/ea8e9f3b0778e7e9fc8a286af079c3b42e5e0493))
+* use PWA_PORT environment variable for web API port configuration ([d2ccc64](https://github.com/karlorz/daily-login-assistant/commit/d2ccc6400a85112e59d7d2b28e996de99a6241f8))
+
+
+### Features
+
+* add non-interactive deployment support with INSTALL_BRANCH and INSTALL_PORT env vars ([88a9615](https://github.com/karlorz/daily-login-assistant/commit/88a9615fd8b90b52eedcf21988c7428b78025dca))
+
 # [1.3.0](https://github.com/karlorz/daily-login-assistant/compare/v1.2.8...v1.3.0) (2025-10-12)
 
 
