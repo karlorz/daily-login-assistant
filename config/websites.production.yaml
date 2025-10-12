@@ -1,0 +1,35 @@
+# Production Configuration for Remote Docker Deployment
+# Optimized for anyrouter.top with cookie-based authentication
+
+websites:
+  # AnyRouter User 1 - Cookie-based profile
+  - id: anyrouter-user1
+    name: "AnyRouter User 1"
+    url: "https://anyrouter.top/"
+    enabled: true
+    method: "cookie-based"  # Uses uploaded cookies, not auto-fill
+    profile: "anyrouter-user1"  # Profile created via web UI
+    schedule:
+      time: "09:00"  # Daily check-in at 9 AM
+      timezone: "Asia/Hong_Kong"
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Add more profiles as needed (copy the above block and modify)
+  # - id: anyrouter-user2
+  #   name: "AnyRouter User 2"
+  #   url: "https://anyrouter.top/"
+  #   enabled: false
+  #   method: "cookie-based"
+  #   profile: "anyrouter-user2"
+  #   schedule:
+  #     time: "09:05"
+  #     timezone: "Asia/Hong_Kong"

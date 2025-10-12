@@ -1,26 +1,58 @@
 name: daily-login-assistant
 
 services:
+  # SSH Tunnel Service for remote cookie extraction
+  ssh-tunnel:
+    image: lscr.io/linuxserver/openssh-server:latest
+    container_name: ssh-tunnel
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Hong_Kong
+      - USER_NAME=tunnel
+      - USER_PASSWORD=${SSH_TUNNEL_PASSWORD:-dev}
+      - PASSWORD_ACCESS=true
+    ports:
+      - "2222:2222"
+    volumes:
+      - ./ssh-config:/config
+      - ./docker/init-ssh.sh:/custom-cont-init.d/init-ssh.sh:ro
+    restart: unless-stopped
+    networks:
+      - app-network
+
   daily-login-assistant:
     build:
       context: .
       dockerfile: Dockerfile
       args:
         DEBIAN_FRONTEND: noninteractive
-        TZ: Japan
-        DOCKER_IMAGE_NAME_TEMPLATE: "mcr.microsoft.com/playwright:v1.55.0-noble"
+        TZ: Asia/Hong_Kong
+        DOCKER_IMAGE_NAME_TEMPLATE: "mcr.microsoft.com/playwright:v1.55.1-noble"
     container_name: daily-login-assistant
     volumes:
-      - profiles_data:/app/profiles
-      - logs_data:/app/logs
-      - screenshots_data:/app/screenshots
+      # Bind mount for profile persistence (recommended for easy access)
+      - ./profiles:/app/profiles
+      - ./logs:/app/logs
+      - ./logs/screenshots:/app/logs/screenshots
+      # Alternative: Use named volumes for production
+      # - profiles_data:/app/profiles
+      # - logs_data:/app/logs
+      # - screenshots_data:/app/logs/screenshots
     environment:
       NODE_ENV: production
       WORKER_ID: ${HOSTNAME:-worker-1}
       LANG: C.UTF-8
       LC_ALL: C.UTF-8
       PLAYWRIGHT_BROWSERS_PATH: /ms-playwright
-      TZ: Japan
+      TZ: Asia/Hong_Kong
+      # SSH Tunnel configuration
+      REMOTE_SSH_HOST: ${REMOTE_SSH_HOST:-localhost}
+      REMOTE_SSH_PORT: ${REMOTE_SSH_PORT:-2222}
+      REMOTE_SSH_USER: ${REMOTE_SSH_USER:-tunnel}
+      SSH_TUNNEL_PASSWORD: ${SSH_TUNNEL_PASSWORD:-dev}
+      API_ENDPOINT: ${API_ENDPOINT:-http://localhost:8001/api/tunnel-ready}
+      ALLOWED_ORIGIN: ${ALLOWED_ORIGIN:-http://localhost:8001}
     ports:
       - '127.0.0.1:8001:3001'
     working_dir: /app
@@ -28,8 +60,13 @@ services:
     user: "1001"
     init: false
     ipc: host
+    depends_on:
+      - ssh-tunnel
+    networks:
+      - app-network
+
 networks:
-  default:
+  app-network:
     driver: bridge
 
 volumes:

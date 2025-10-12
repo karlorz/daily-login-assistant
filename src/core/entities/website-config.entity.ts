@@ -7,6 +7,8 @@ export class WebsiteConfig {
     public automation: AutomationConfig = new AutomationConfig(),
     public security: SecurityConfig = new SecurityConfig(),
     public schedule?: ScheduleConfig,
+    public enabled: boolean = true,
+    public credentials?: CredentialsConfig,
   ) {}
 }
 
@@ -36,6 +38,9 @@ export class SecurityConfig {
     public captchaService?: string,
     public userAgentRotation: boolean = true,
     public proxyRequired: boolean = false,
+    public useStealth: boolean = true,
+    public antiDetection: boolean = true,
+    public randomDelays: boolean = true,
   ) {}
 }
 
@@ -43,5 +48,12 @@ export class ScheduleConfig {
   constructor(
     public time: string,
     public timezone: string = 'UTC',
+  ) {}
+}
+
+export class CredentialsConfig {
+  constructor(
+    public username_env: string,
+    public password_env: string,
   ) {}
 }

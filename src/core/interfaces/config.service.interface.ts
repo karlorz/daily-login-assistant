@@ -1,4 +1,4 @@
-import { WebsiteConfig } from "../entities";
+import { WebsiteConfig } from "../entities/index.js";
 
 export interface IConfigService {
   loadConfig(path: string): Promise<void>;

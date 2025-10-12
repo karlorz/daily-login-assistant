@@ -1,0 +1,85 @@
+websites:
+  # Example with GitHub login (for demonstration - don't use with real credentials!)
+  - id: github-demo
+    name: "GitHub Login Demo"
+    url: "https://github.com/login"
+    enabled: false  # Disabled by default for safety
+    schedule:
+      time: "09:00"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "GITHUB_USERNAME"
+      password_env: "GITHUB_PASSWORD"
+    selectors:
+      username: ["#login_field", "[name='login']"]
+      password: ["#password", "[name='password']"]
+      loginButton: ["[type='submit']", ".btn-primary"]
+      checkinButton: []  # GitHub doesn't have daily check-in
+      logoutIndicator: [".Header-link--profile", "[data-target='user-avatar.menu']"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 120
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Example with a demo/test login site
+  - id: demo-login
+    name: "Demo Login Site"
+    url: "https://the-internet.herokuapp.com/login"
+    enabled: true
+    schedule:
+      time: "10:00"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "DEMO_USERNAME"  # Set to "tomsmith"
+      password_env: "DEMO_PASSWORD"  # Set to "SuperSecretPassword!"
+    selectors:
+      username: ["#username", "[name='username']"]
+      password: ["#password", "[name='password']"]
+      loginButton: [".fa-sign-in", "[type='submit']"]
+      checkinButton: []  # No check-in on demo site
+      logoutIndicator: [".icon-signout", "a[href='/logout']"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
+
+  # Template for your actual website
+  - id: your-website
+    name: "Your Website Name"
+    url: "https://yourwebsite.com/login"
+    enabled: false  # Enable when you configure it
+    schedule:
+      time: "08:00"
+      timezone: "America/New_York"
+    credentials:
+      username_env: "YOUR_SITE_USERNAME"
+      password_env: "YOUR_SITE_PASSWORD"
+    selectors:
+      # Update these selectors by inspecting your login page
+      username: ["#email", "#username", "[name='email']", "[name='username']"]
+      password: ["#password", "[name='password']", ".password-field"]
+      loginButton: ["#login", ".login-btn", "[type='submit']", ".btn-primary"]
+      checkinButton: [".checkin", "#checkin", ".daily-signin", ".attendance"]
+      logoutIndicator: [".logout", ".profile", ".user-menu", ".account-menu"]
+    automation:
+      waitForNetworkIdle: true
+      typingDelay: 100
+      navigationTimeout: 30000
+      retryAttempts: 3
+      retryDelay: 5000
+    security:
+      useStealth: true
+      antiDetection: true
+      randomDelays: true
