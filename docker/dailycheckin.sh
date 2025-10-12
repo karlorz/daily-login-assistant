@@ -150,12 +150,24 @@ if [ -d "$INSTALL_DIR" ]; then
 fi
 
 # Branch selection
-# Check if running in non-interactive mode (for testing)
-if [[ "$IS_CONTAINER" == "true" && ! -t 0 ]]; then
-    BRANCH="feat/Automation"  # Default branch for container testing
+# Check for environment variables or non-interactive mode
+if [[ -n "$INSTALL_BRANCH" ]]; then
+    # Use environment variable if set
+    BRANCH="$INSTALL_BRANCH"
+    PORT="${INSTALL_PORT:-$DEFAULT_PORT}"
+    echo -e "${YW}Using environment settings: branch=${BRANCH}, port=${PORT}${CL}"
+elif [[ "$IS_CONTAINER" == "true" && ! -t 0 ]]; then
+    # Container non-interactive mode
+    BRANCH="main"  # Default to main in container
     PORT=$DEFAULT_PORT
     echo -e "${YW}Non-interactive mode detected: Using branch ${BRANCH} and port ${PORT}${CL}"
+elif [[ ! -t 0 ]]; then
+    # Non-interactive mode (piped input) - use defaults
+    BRANCH="main"
+    PORT=$DEFAULT_PORT
+    echo -e "${YW}Non-interactive mode: Using branch ${BRANCH} and port ${PORT}${CL}"
 else
+    # Interactive mode - prompt user
     echo -e "${YW}Select branch to deploy:${CL}"
     echo -e "  ${GN}1)${CL} main (Production - Recommended)"
     echo -e "  ${GN}2)${CL} feat/Automation (Development)"
