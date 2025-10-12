@@ -1,3 +1,10 @@
+# [1.8.0](https://github.com/karlorz/daily-login-assistant/compare/v1.7.1...v1.8.0) (2025-10-12)
+
+
+### Features
+
+* add web UI for profile management and manual check-ins ([2d4e8b9](https://github.com/karlorz/daily-login-assistant/commit/2d4e8b9deeca6db99b8a848c7caa58c29d0b69f8))
+
 ## [1.7.1](https://github.com/karlorz/daily-login-assistant/compare/v1.7.0...v1.7.1) (2025-10-12)
 
 
