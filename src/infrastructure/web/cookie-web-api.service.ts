@@ -25,7 +25,7 @@ export class CookieWebApiService {
     this.cdpExtractor = new CDPCookieExtractorService();
     this.sessionManager = new SessionManagerService();
     this.publicDir = path.join(process.cwd(), 'public');
-    this.port = parseInt(process.env.WEB_API_PORT || '3001', 10);
+    this.port = parseInt(process.env.PWA_PORT || process.env.WEB_API_PORT || '3001', 10);
 
     // Cleanup expired sessions every 5 minutes
     setInterval(() => {
