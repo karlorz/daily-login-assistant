@@ -115,6 +115,11 @@ jobs:
           PLAYWRIGHT_HEADLESS: true
           DEBUG: pw:api
 
+      - name: Run Bun-specific tests
+        run: bun test __tests__/unit/web/cookie-web-api.service.test.ts
+        env:
+          CI: true
+
       - name: Build project
         run: bun run build
 

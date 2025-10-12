@@ -256,10 +256,24 @@ settings:
 
 ## Environment Variables
 ```bash
+# SSH Tunnel Configuration
+# IMPORTANT: Different ports for different environments
+# - Production LXC/VPS: Use port 22 (standard SSH)
+# - Development Docker: Use port 2222 (dedicated SSH tunnel service)
+REMOTE_SSH_HOST="dailycheckin.lan"  # Production hostname
+REMOTE_SSH_PORT="22"                 # Port 22 for production, 2222 for dev
+REMOTE_SSH_USER="tunnel"
+SSH_TUNNEL_PASSWORD="your_password"
+
+# PWA Configuration
+PWA_PORT="3001"                      # Internal port (mapped to 8001 in docker-compose)
+API_ENDPOINT="http://dailycheckin.lan:8001/api/tunnel-ready"
+ALLOWED_ORIGIN="http://dailycheckin.lan:8001"
+
 # Notification URLs (comma-separated)
 NOTIFICATION_URLS="discord://token@channel,slack://token@channel,smtp://user:pass@host:587/?from=bot@example.com&to=admin@example.com"
 
-# Website credentials
+# Website credentials (optional - for auto-fill method)
 SITE1_USERNAME="your_username"
 SITE1_PASSWORD="your_password"
 SITE2_USERNAME="your_username"
@@ -269,6 +283,8 @@ SITE2_PASSWORD="your_password"
 NODE_ENV="production"
 LOG_LEVEL="info"
 ```
+
+**Configuration Reference**: See `.env.example` in the project root for complete configuration options with production and development examples.
 
 ## Shoutrrr Notifications
 

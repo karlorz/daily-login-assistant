@@ -499,7 +499,7 @@ export class CookieWebApiService {
       const config = {
         SESSION_TOKEN: token,
         REMOTE_SSH_HOST: process.env.REMOTE_SSH_HOST || 'anyrouter.top',
-        REMOTE_SSH_PORT: process.env.REMOTE_SSH_PORT || '2222',
+        REMOTE_SSH_PORT: process.env.REMOTE_SSH_PORT || '22',
         REMOTE_SSH_USER: process.env.REMOTE_SSH_USER || 'tunnel',
         SSH_PASSWORD: process.env.SSH_TUNNEL_PASSWORD || '',
         API_ENDPOINT: defaultApiEndpoint,
