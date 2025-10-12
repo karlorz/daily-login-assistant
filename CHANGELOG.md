@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/karlorz/daily-login-assistant/compare/v1.6.5...v1.7.0) (2025-10-12)
+
+
+### Features
+
+* add SSH tunnel auto-cleanup and improved PWA UX ([46db8df](https://github.com/karlorz/daily-login-assistant/commit/46db8df221ae8950fc1644cc3143b631b8159f3e))
+
 ## [1.6.5](https://github.com/karlorz/daily-login-assistant/compare/v1.6.4...v1.6.5) (2025-10-12)
 
 
