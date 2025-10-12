@@ -178,7 +178,7 @@ async function main() {
             }
           }
         }
-      } catch (error) {
+      } catch {
         // Silently fail if PWA server is not available or profiles can't be checked
         // This is expected during startup or if PWA feature is not enabled
       }
