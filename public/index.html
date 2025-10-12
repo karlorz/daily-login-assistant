@@ -284,6 +284,72 @@
     </div>
 
     <script>
+        // ========== LocalStorage Form History ==========
+        function saveFormData(method) {
+            const formData = {
+                site: document.getElementById(`${method}-site`).value.trim(),
+                user: document.getElementById(`${method}-user`).value.trim(),
+                url: document.getElementById(`${method}-url`).value.trim(),
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(`lastForm_${method}`, JSON.stringify(formData));
+        }
+
+        function loadFormData(method) {
+            const saved = localStorage.getItem(`lastForm_${method}`);
+            if (saved) {
+                const data = JSON.parse(saved);
+                document.getElementById(`${method}-site`).value = data.site || '';
+                document.getElementById(`${method}-user`).value = data.user || '';
+                document.getElementById(`${method}-url`).value = data.url || '';
+            }
+        }
+
+        // Load saved form data on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFormData('script');
+            loadFormData('manual');
+        });
+
+        // Save form data on input change
+        ['script', 'manual'].forEach(method => {
+            ['site', 'user', 'url'].forEach(field => {
+                const input = document.getElementById(`${method}-${field}`);
+                if (input) {
+                    input.addEventListener('input', () => saveFormData(method));
+                }
+            });
+        });
+
+        // ========== Close Tunnel Function ==========
+        async function closeTunnel() {
+            if (!window.sessionData || !window.sessionData.sessionToken) {
+                showStatus('script', 'error', 'No active session to close');
+                return;
+            }
+
+            const { sessionToken } = window.sessionData;
+            showStatus('script', 'info', '<span class="loader"></span>Closing tunnel...');
+
+            try {
+                const res = await fetch(`/api/session/${sessionToken}/close`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const data = await res.json();
+
+                if (data.success) {
+                    showStatus('script', 'success', '✅ Tunnel closed successfully! You can close this page.');
+                    window.sessionData = null;
+                } else {
+                    showStatus('script', 'error', `Failed to close tunnel: ${data.message}`);
+                }
+            } catch (error) {
+                showStatus('script', 'error', `Error: ${error.message}`);
+            }
+        }
+
         // Detect OS
         function detectOS() {
             const platform = navigator.platform.toLowerCase();
@@ -446,7 +512,8 @@
         async function pollForLoginCompletion() {
             showStatus('script', 'info',
                 '<span class="loader"></span>After logging in, click the button below:<br>' +
-                '<button onclick="extractCookies()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Complete Setup & Extract Cookies</button>'
+                '<button onclick="extractCookies()" style="margin-top: 10px; padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px;">Complete Setup & Extract Cookies</button><br><br>' +
+                '<button onclick="closeTunnel()" style="margin-top: 5px; padding: 8px 16px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Close Tunnel Without Extracting</button>'
             );
         }
 
@@ -465,8 +532,10 @@
                 const data = await res.json();
 
                 if (data.success) {
-                    showStatus('script', 'success', `✅ Profile created successfully! (${data.cookies} cookies extracted)`);
-                    window.sessionData = null;
+                    showStatus('script', 'success',
+                        `✅ Profile created successfully! (${data.cookies} cookies extracted)<br><br>` +
+                        '<button onclick="closeTunnel()" style="margin-top: 10px; padding: 10px 20px; background: #f44336; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 14px;">Close Tunnel & Finish</button>'
+                    );
                 } else {
                     showStatus('script', 'error', `Error: ${data.error}`);
                 }

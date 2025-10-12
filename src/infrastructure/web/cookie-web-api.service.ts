@@ -92,6 +92,7 @@ export class CookieWebApiService {
     console.log(`   POST /api/session/create              - Create new session`);
     console.log(`   GET  /api/session/:token              - Get session status`);
     console.log(`   GET  /api/session/:token/script/:os   - Download launcher script`);
+    console.log(`   POST /api/session/:token/close        - Close SSH tunnel`);
     console.log(`   POST /api/tunnel-ready                - Notify tunnel connected`);
     console.log(`   POST /api/profiles/extract-from-tunnel - Extract cookies via CDP`);
     console.log(`   GET  /health                          - Health check`);
@@ -405,6 +406,37 @@ export class CookieWebApiService {
           }
         );
       }
+    }
+
+    // Close tunnel endpoint
+    const closeTunnelMatch = pathname.match(/^\/api\/session\/([^/]+)\/close$/);
+    if (closeTunnelMatch && method === 'POST') {
+      const [, token] = closeTunnelMatch;
+
+      const session = this.sessionManager.getSession(token);
+      if (!session) {
+        return new Response(
+          JSON.stringify({ error: 'Invalid session' }),
+          {
+            status: 404,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }
+
+      const closed = await this.sessionManager.closeTunnel(token);
+      this.sessionManager.updateSession(token, { status: 'completed' });
+
+      return new Response(
+        JSON.stringify({
+          success: closed,
+          message: closed ? 'Tunnel closed successfully' : 'Failed to close tunnel'
+        }),
+        {
+          status: closed ? 200 : 500,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     return new Response('Not Found', { status: 404 });
