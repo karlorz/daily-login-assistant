@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/karlorz/daily-login-assistant/compare/v1.6.2...v1.6.3) (2025-10-12)
+
+
+### Bug Fixes
+
+* scripts/templates/launcher.sh ([1a3280f](https://github.com/karlorz/daily-login-assistant/commit/1a3280f350961a510b34d40db4dc65a3406a0da7))
+
 ## [1.6.2](https://github.com/karlorz/daily-login-assistant/compare/v1.6.1...v1.6.2) (2025-10-12)
 
 
