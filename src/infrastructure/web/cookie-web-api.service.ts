@@ -13,7 +13,7 @@ import type { Cookie } from 'playwright';
 import path from 'path';
 
 export class CookieWebApiService {
-  private server: Server | null = null;
+  private server: any | null = null;
   private cookieService: CookieProfileService;
   private cdpExtractor: CDPCookieExtractorService;
   private sessionManager: SessionManagerService;
