@@ -490,14 +490,20 @@ export class CookieWebApiService {
       const template = await Bun.file(templatePath).text();
 
       // Get configuration from environment or use defaults
+      // Auto-detect API endpoint based on current port
+      const defaultApiEndpoint = process.env.API_ENDPOINT ||
+        `http://${process.env.REMOTE_SSH_HOST || 'anyrouter.top'}:${this.port}/api/tunnel-ready`;
+      const defaultAllowedOrigin = process.env.ALLOWED_ORIGIN ||
+        `http://${process.env.REMOTE_SSH_HOST || 'anyrouter.top'}:${this.port}`;
+
       const config = {
         SESSION_TOKEN: token,
         REMOTE_SSH_HOST: process.env.REMOTE_SSH_HOST || 'anyrouter.top',
         REMOTE_SSH_PORT: process.env.REMOTE_SSH_PORT || '2222',
         REMOTE_SSH_USER: process.env.REMOTE_SSH_USER || 'tunnel',
         SSH_PASSWORD: process.env.SSH_TUNNEL_PASSWORD || '',
-        API_ENDPOINT: process.env.API_ENDPOINT || 'https://anyrouter.top:3001/api/tunnel-ready',
-        ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || 'https://anyrouter.top',
+        API_ENDPOINT: defaultApiEndpoint,
+        ALLOWED_ORIGIN: defaultAllowedOrigin,
       };
 
       // Replace placeholders

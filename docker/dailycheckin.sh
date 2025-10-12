@@ -376,6 +376,9 @@ if [[ "$FORCE_SYSTEMD" == "true" ]] || [[ "$IS_CONTAINER" == "false" ]]; then
         RUNTIME_NAME="Node.js"
     fi
 
+    # Auto-detect hostname for remote SSH configuration
+    HOSTNAME=$(hostname -f 2>/dev/null || hostname)
+
     cat <<EOF >"$SERVICE_PATH"
 [Unit]
 Description=Daily Login Assistant
@@ -390,6 +393,7 @@ WorkingDirectory=${INSTALL_DIR}
 Environment=NODE_ENV=production
 Environment=PWA_PORT=${PORT}
 Environment=PWA_HOST=0.0.0.0
+Environment=REMOTE_SSH_HOST=${HOSTNAME}
 Environment=PATH=${BUN_INSTALL}/bin:/usr/local/bin:/usr/bin:/bin
 ExecStart=${RUNTIME_CMD} run dist/index.js
 Restart=always
